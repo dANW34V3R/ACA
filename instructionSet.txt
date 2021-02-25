@@ -1,0 +1,43 @@
+Based on Thumb https://developer.arm.com/documentation/ddi0210/c/Introduction/Instruction-set-summary/Thumb-instruction-summary
+
+
+MOV Rd. #imm		- Rd <- #imm
+MOV Rd, Rc		- Rd <- Rc
+
+ADD Rd, #imm		- Rd <- Rd + #imm
+ADD Rd, Rs, Rn		- Rd <- Rs + Rn
+
+SUB Rd, #imm		- Rd <- Rd - #imm
+SUB Rd, Rs, Rn		- Rd <- Rs - Rn
+
+MUL Rd, Rs, Rn		- Rd <- Rs * Rn 
+
+DIV Rd, Rs, Rn		- Rd <- Rs / Rn
+
+CMP Rd, Rs		- -1 if Rd < Rs, 0 if Rd = Rs, +1 if Rd > Rs
+
+AND Rd, Rs		- Rd <- Rd . Rs bitwise
+
+OR Rd, Rs		- Rd <- Rd + Rs bitwise
+
+NOT Rd			- Rd <- NOT Rd bitwise
+
+BEQ label		- if CMP = 0 goto label
+
+BNE label		- if CMP /= 0 goto label
+
+BLT label		- if CMP = -1 goto label
+
+BGT label 		- if CMP = +1 goto label
+
+B label		- goto label
+
+LDR Rd, [Rb, #imm]	- Rd <- MEM[Rb + #imm]
+LDR Rd, [Rb, Ro]	- Rd <- MEM[Rb + Ro]
+
+STR Rd, [Rb, #imm]	- MEM[Rb + #imm] <- Rd
+STR Rd, [Rb, Ro]	- MEM[Rb + Ro]   <- Rd
+
+NOP			- No operation
+
+HALT			- Stop executing
