@@ -1,7 +1,7 @@
 Based on Thumb https://developer.arm.com/documentation/ddi0210/c/Introduction/Instruction-set-summary/Thumb-instruction-summary
 
 
-MOV Rd. #imm		- Rd <- #imm
+MOV Rd, #imm		- Rd <- #imm
 MOV Rd, Rc		- Rd <- Rc
 
 ADD Rd, #imm		- Rd <- Rd + #imm
