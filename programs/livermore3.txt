@@ -17,4 +17,4 @@ BLT loop2
 ADD R0 #1
 CMP R0 R4
 BLT loop1
-HALT 
+HALT

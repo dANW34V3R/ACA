@@ -14,6 +14,13 @@ public class Instruction {
         operand3 = operand3Val;
     }
 
-
-
+    @Override
+    public String toString() {
+        return "Instruction{" +
+                "opcode='" + opcode + '\'' +
+                ", operand1=" + operand1 +
+                ", operand2=" + operand2 +
+                ", operand3=" + operand3 +
+                '}';
+    }
 }

@@ -2,7 +2,11 @@ package com.company;
 
 public class Decode implements Module{
 
-    public Decode(){}
+    Processor p;
+
+    public Decode(Processor proc) {
+        p = proc;
+    }
 
 
     @Override
