@@ -7,10 +7,8 @@ public class Processor {
     public List<Instruction> INSMEM;
     public List<Integer> MEM = new ArrayList<>(Collections.nCopies(1024, 0));
 
-    public List<Integer> ARF = new ArrayList<>(Collections.nCopies(32, 1));
+    public List<Integer> ARF = new ArrayList<>(Collections.nCopies(32, -1));
 
-    public int PC = -1;
-    public int SP = 0;
     public boolean fin = false;
 
     //flags
@@ -41,7 +39,7 @@ public class Processor {
             insD.tick();
             insE.tick();
             cycles += 3;
-            System.out.println(ARF.toString() + "flag=" + f + ",PC=" + PC);
+            System.out.println(ARF.toString() + "flag=" + f + ",PC=" + ARF.get(30));
             System.out.println(MEM.toString());
         }
 

@@ -11,6 +11,6 @@ public class Fetch implements Module{
 
     @Override
     public void tick() {
-        p.PC++;
+        p.ARF.set(30, p.ARF.get(30) + 1);
     }
 }

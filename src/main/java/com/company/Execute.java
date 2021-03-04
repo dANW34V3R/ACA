@@ -1,8 +1,5 @@
 package com.company;
 
-import javax.swing.*;
-import java.io.BufferedReader;
-
 public class Execute implements Module {
 
     Processor p;
@@ -14,7 +11,7 @@ public class Execute implements Module {
 
     @Override
     public void tick() {
-        Instruction instruction = p.INSMEM.get(p.PC);
+        Instruction instruction = p.INSMEM.get(p.ARF.get(30));
         System.out.println(instruction.toString());
 
         switch (instruction.opcode)
@@ -56,26 +53,26 @@ public class Execute implements Module {
                 break;
             case "BEQ":
                 if (p.f == 0) {
-                    p.PC = instruction.operand1 - 1;
+                    p.ARF.set(30, instruction.operand1 - 1);
                 }
                 break;
             case "BNE":
                 if (p.f != 0) {
-                    p.PC = instruction.operand1 - 1;
+                    p.ARF.set(30, instruction.operand1 - 1);
                 }
                 break;
             case "BLT":
                 if (p.f == -1) {
-                    p.PC = instruction.operand1 - 1;
+                    p.ARF.set(30, instruction.operand1 - 1);
                 }
                 break;
             case "BGT":
                 if (p.f == 1) {
-                    p.PC = instruction.operand1 - 1;
+                    p.ARF.set(30, instruction.operand1 - 1);
                 }
                 break;
             case "B":
-                p.PC = instruction.operand1 - 1;
+                p.ARF.set(30, instruction.operand1 - 1);
                 break;
             case "LDRi":
                 p.ARF.set(instruction.operand1, p.MEM.get(p.ARF.get(instruction.operand2) + instruction.operand3));

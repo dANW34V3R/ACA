@@ -130,7 +130,7 @@ public class Main {
 
 //        instructionStringsWithoutLabels.forEach(System.out::println);
 //        System.out.println(labelToAddr.toString());
-//        instructions.forEach(System.out::println);
+        instructions.forEach(System.out::println);
 
         return instructions;
     }
