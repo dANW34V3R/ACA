@@ -162,10 +162,11 @@ public class Main {
 
 
     public static void main(String[] args) {
+
         //read file
         //compile file
-        List<Instruction> instructions = createInstructinFromFile("programs/vectorAddition.txt");
-        List<Integer> memory = readMemoryFile("programs/vectorAdditionMEM.txt");
+        List<Instruction> instructions = createInstructinFromFile("programs/" + args[0] + "/program.txt");
+        List<Integer> memory = readMemoryFile("programs/" + args[0] + "/memory.txt");
 
         //execute file
         Processor p = new Processor(instructions, memory);
