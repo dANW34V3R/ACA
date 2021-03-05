@@ -15,9 +15,9 @@ public class Processor {
     public int f;
 
 
-    private Fetch insF = new Fetch(this);
-    private Decode insD = new Decode(this);
-    private Execute insE = new Execute(this);
+    public Fetch insF = new Fetch(this);
+    public Decode insD = new Decode(this);
+    public Execute insE = new Execute(this);
 
     public Instruction fetchInstruction;
     public Instruction decodeInstruction;

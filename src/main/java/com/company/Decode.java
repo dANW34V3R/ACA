@@ -11,6 +11,13 @@ public class Decode implements Module{
 
     @Override
     public void tick() {
-        p.decodeInstruction = p.fetchInstruction;
+        if (!blocked()) {
+            p.decodeInstruction = p.fetchInstruction;
+        }
+    }
+
+    @Override
+    public boolean blocked() {
+        return p.insE.blocked();
     }
 }

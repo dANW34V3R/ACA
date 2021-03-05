@@ -11,7 +11,14 @@ public class Fetch implements Module{
 
     @Override
     public void tick() {
-        p.ARF.set(30, p.ARF.get(30) + 1);
-        p.fetchInstruction = p.INSMEM.get(p.ARF.get(30));
+        if (!blocked()) {
+            p.ARF.set(30, p.ARF.get(30) + 1);
+            p.fetchInstruction = p.INSMEM.get(p.ARF.get(30));
+        }
+    }
+
+    @Override
+    public boolean blocked() {
+        return p.insD.blocked();
     }
 }

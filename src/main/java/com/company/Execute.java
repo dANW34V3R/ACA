@@ -3,14 +3,22 @@ package com.company;
 public class Execute implements Module {
 
     Processor p;
+    int cyclesToGo = 0;
 
     public Execute(Processor proc) {
         p = proc;
     }
 
+    @Override
+    public boolean blocked() {
+        return cyclesToGo > 0;
+    }
 
     @Override
     public void tick() {
+        cyclesToGo -= 1;
+        System.out.println("Execution unit blocked: " + blocked());
+
         Instruction instruction = p.decodeInstruction;
         p.executeInstruction = instruction;
         System.out.println(instruction.toString());
@@ -36,10 +44,18 @@ public class Execute implements Module {
                 p.ARF.set(instruction.operand1, p.ARF.get(instruction.operand2) - p.ARF.get(instruction.operand3));
                 break;
             case "MUL":
-                p.ARF.set(instruction.operand1, p.ARF.get(instruction.operand2) * p.ARF.get(instruction.operand3));
+                if (cyclesToGo < 0) {
+                    cyclesToGo = 3;
+                } else if (cyclesToGo == 0) {
+                    p.ARF.set(instruction.operand1, p.ARF.get(instruction.operand2) * p.ARF.get(instruction.operand3));
+                }
                 break;
             case "DIV":
-                p.ARF.set(instruction.operand1, p.ARF.get(instruction.operand2) / p.ARF.get(instruction.operand3));
+                if (cyclesToGo < 0) {
+                    cyclesToGo = 3;
+                } else if (cyclesToGo == 0) {
+                    p.ARF.set(instruction.operand1, p.ARF.get(instruction.operand2) / p.ARF.get(instruction.operand3));
+                }
                 break;
             case "CMP":
                 //op1 - op2 , update flags
@@ -76,16 +92,32 @@ public class Execute implements Module {
                 p.ARF.set(30, instruction.operand1 - 1);
                 break;
             case "LDRi":
-                p.ARF.set(instruction.operand1, p.MEM.get(p.ARF.get(instruction.operand2) + instruction.operand3));
+                if (cyclesToGo < 0) {
+                    cyclesToGo = 3;
+                } else if (cyclesToGo == 0) {
+                    p.ARF.set(instruction.operand1, p.MEM.get(p.ARF.get(instruction.operand2) + instruction.operand3));
+                }
                 break;
             case "LDR":
-                p.ARF.set(instruction.operand1, p.MEM.get(p.ARF.get(instruction.operand2) + p.ARF.get(instruction.operand3)));
+                if (cyclesToGo < 0) {
+                    cyclesToGo = 3;
+                } else if (cyclesToGo == 0) {
+                    p.ARF.set(instruction.operand1, p.MEM.get(p.ARF.get(instruction.operand2) + p.ARF.get(instruction.operand3)));
+                }
                 break;
             case "STRi":
-                p.MEM.set(p.ARF.get(instruction.operand2) + instruction.operand3, p.ARF.get(instruction.operand1));
+                if (cyclesToGo < 0) {
+                    cyclesToGo = 3;
+                } else if (cyclesToGo == 0) {
+                    p.MEM.set(p.ARF.get(instruction.operand2) + instruction.operand3, p.ARF.get(instruction.operand1));
+                }
                 break;
             case "STR":
-                p.MEM.set(p.ARF.get(instruction.operand2) + p.ARF.get(instruction.operand3), p.ARF.get(instruction.operand1));
+                if (cyclesToGo < 0) {
+                    cyclesToGo = 3;
+                } else if (cyclesToGo == 0) {
+                    p.MEM.set(p.ARF.get(instruction.operand2) + p.ARF.get(instruction.operand3), p.ARF.get(instruction.operand1));
+                }
                 break;
             case "NOP":
                 break;
@@ -96,6 +128,5 @@ public class Execute implements Module {
                 System.out.println("opcode " + instruction.opcode + " not recognised");
                 break;
         }
-
     }
 }
