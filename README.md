@@ -3,11 +3,11 @@
 A precompiled version of the simulator can be found within the target folder. It will have a name similar to ACA-1.0-SNAPSHOT.jar.
 This has been compiled to java 8 and can be run on the lab machines. From within the top directory use the following command to run the jar:
 
-java -jar target/ACA-1.0-SNAPSHOT.jar <program>
+`java -jar target/ACA-1.0-SNAPSHOT.jar <program>`
 
 <program> should be replaced with the name of the folder containing "program" and "memory" files. An example would be:
 
-java -jar target/ACA-1.0-SNAPSHOT.jar vectorAddition
+`java -jar target/ACA-1.0-SNAPSHOT.jar vectorAddition`
 
 Other available programs are:
 
