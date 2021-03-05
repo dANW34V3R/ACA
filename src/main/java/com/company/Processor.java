@@ -19,6 +19,11 @@ public class Processor {
     private Decode insD = new Decode(this);
     private Execute insE = new Execute(this);
 
+    public Instruction fetchInstruction;
+    public Instruction decodeInstruction;
+    public Instruction executeInstruction;
+
+
     private int tick = 0;
     private int cycles = 0;
 

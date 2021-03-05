@@ -11,7 +11,8 @@ public class Execute implements Module {
 
     @Override
     public void tick() {
-        Instruction instruction = p.INSMEM.get(p.ARF.get(30));
+        Instruction instruction = p.decodeInstruction;
+        p.executeInstruction = instruction;
         System.out.println(instruction.toString());
 
         switch (instruction.opcode)

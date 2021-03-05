@@ -11,6 +11,6 @@ public class Decode implements Module{
 
     @Override
     public void tick() {
-
+        p.decodeInstruction = p.fetchInstruction;
     }
 }

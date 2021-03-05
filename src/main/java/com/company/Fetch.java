@@ -12,5 +12,6 @@ public class Fetch implements Module{
     @Override
     public void tick() {
         p.ARF.set(30, p.ARF.get(30) + 1);
+        p.fetchInstruction = p.INSMEM.get(p.ARF.get(30));
     }
 }
