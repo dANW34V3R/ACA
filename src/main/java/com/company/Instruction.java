@@ -6,6 +6,7 @@ public class Instruction {
     public int operand1;
     public int operand2;
     public int operand3;
+    public boolean valid = true;
 
     public Instruction(String opcodeVal, int operand1Val, int operand2Val, int operand3Val){
         opcode = opcodeVal;

@@ -6,7 +6,7 @@ import java.util.*;
 
 public class Main {
 
-    private static List<Instruction> createInstructinFromFile(String path){
+    private static List<Instruction> createInstructionsFromFile(String path){
         try {
 
             List<String> rawInstructions = new ArrayList<>();
@@ -163,7 +163,7 @@ public class Main {
 
         //read file
         //compile file
-        List<Instruction> instructions = createInstructinFromFile("programs/" + args[0] + "/program.txt");
+        List<Instruction> instructions = createInstructionsFromFile("programs/" + args[0] + "/program.txt");
         List<Integer> memory = readMemoryFile("programs/" + args[0] + "/memory.txt");
 
         //execute file

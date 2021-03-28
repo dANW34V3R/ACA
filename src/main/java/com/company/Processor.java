@@ -1,5 +1,7 @@
 package com.company;
 
+import sun.awt.X11.XSystemTrayPeer;
+
 import java.util.*;
 
 public class Processor {
@@ -14,15 +16,14 @@ public class Processor {
     //flags
     public int f;
 
-
+    // Modules
     public Fetch insF = new Fetch(this);
     public Decode insD = new Decode(this);
     public Execute insE = new Execute(this);
 
-    public Instruction fetchInstruction;
-    public Instruction decodeInstruction;
-    public Instruction executeInstruction;
-
+    public Instruction fetchInstruction = new Instruction("NOP",0,0,0);
+    public Instruction decodeInstruction = new Instruction("NOP",0,0,0);
+    public Instruction executeInstruction = new Instruction("NOP",0,0,0);;
 
     private int tick = 0;
     private int cycles = 0;
@@ -40,12 +41,17 @@ public class Processor {
     private void go() {
 
         while (!fin) {
-            insF.tick();
-            insD.tick();
             insE.tick();
+            insD.tick();
+            insF.tick();
             cycles += 3;
+            System.out.println("FE:" + fetchInstruction.toString() + fetchInstruction.valid);
+            System.out.println("DE:" + decodeInstruction.toString() + decodeInstruction.valid);
+            System.out.println("EX:" + executeInstruction.toString() + executeInstruction.valid);
+            System.out.println("Execution unit blocked: " + insE.blocked());
             System.out.println(ARF.toString() + "flag=" + f + ",PC=" + ARF.get(30));
             System.out.println(MEM.toString());
+            System.out.println("__________________________________");
         }
 
         System.out.println("process finished");
