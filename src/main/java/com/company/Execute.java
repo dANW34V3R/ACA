@@ -33,7 +33,11 @@ public class Execute implements Module {
                     p.ARF.set(instruction.operand1, instruction.operand2);
                     break;
                 case "MOV":
-                    p.ARF.set(instruction.operand1, p.ARF.get(instruction.operand2));
+                    if (instruction.operand2 == 30) {
+                        p.ARF.set(instruction.operand1, instruction.PC);
+                    } else {
+                        p.ARF.set(instruction.operand1, p.ARF.get(instruction.operand2));
+                    }
                     break;
                 case "ADDi":
                     p.ARF.set(instruction.operand1, p.ARF.get(instruction.operand1) + instruction.operand2);
@@ -104,6 +108,9 @@ public class Execute implements Module {
                     if (cyclesToGo < 0) {
                         cyclesToGo = 3;
                     } else if (cyclesToGo == 0) {
+                        if (instruction.operand1 == 30) {
+                            invalidatePipeline();
+                        }
                         p.ARF.set(instruction.operand1, p.MEM.get(p.ARF.get(instruction.operand2) + instruction.operand3));
                     }
                     break;
@@ -111,6 +118,9 @@ public class Execute implements Module {
                     if (cyclesToGo < 0) {
                         cyclesToGo = 3;
                     } else if (cyclesToGo == 0) {
+                        if (instruction.operand1 == 30) {
+                            invalidatePipeline();
+                        }
                         p.ARF.set(instruction.operand1, p.MEM.get(p.ARF.get(instruction.operand2) + p.ARF.get(instruction.operand3)));
                     }
                     break;

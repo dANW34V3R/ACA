@@ -45,9 +45,9 @@ public class Processor {
             insD.tick();
             insF.tick();
             cycles += 3;
-            System.out.println("FE:" + fetchInstruction.toString() + fetchInstruction.valid);
-            System.out.println("DE:" + decodeInstruction.toString() + decodeInstruction.valid);
-            System.out.println("EX:" + executeInstruction.toString() + executeInstruction.valid);
+            System.out.println("FE:" + fetchInstruction.toString());
+            System.out.println("DE:" + decodeInstruction.toString());
+            System.out.println("EX:" + executeInstruction.toString());
             System.out.println("Execution unit blocked: " + insE.blocked());
             System.out.println(ARF.toString() + "flag=" + f + ",PC=" + ARF.get(30));
             System.out.println(MEM.toString());
