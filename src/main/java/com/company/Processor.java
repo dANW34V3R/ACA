@@ -27,6 +27,7 @@ public class Processor {
 
     private int tick = 0;
     private int cycles = 0;
+    public int noInstructions = 0;
 
     public Processor(List<Instruction> instructions, List<Integer> memory) {
         INSMEM = instructions;
@@ -44,7 +45,7 @@ public class Processor {
             insE.tick();
             insD.tick();
             insF.tick();
-            cycles += 3;
+            cycles += 1;
             System.out.println("FE:" + fetchInstruction.toString());
             System.out.println("DE:" + decodeInstruction.toString());
             System.out.println("EX:" + executeInstruction.toString());
@@ -55,6 +56,9 @@ public class Processor {
         }
 
         System.out.println("process finished");
+        System.out.println("No. cycles: " + cycles);
+        System.out.println("No. instructions: " + noInstructions);
+        System.out.println("Instructions/Cycle: " + (float) noInstructions/(float) cycles);
 
     }
 

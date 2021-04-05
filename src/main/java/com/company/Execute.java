@@ -2,7 +2,6 @@ package com.company;
 
 import java.io.*;
 import java.nio.charset.Charset;
-import java.util.Scanner;
 
 public class Execute implements Module {
 
@@ -36,30 +35,38 @@ public class Execute implements Module {
             switch (instruction.opcode) {
                 case "MOVi":
                     p.ARF.set(instruction.operand1, instruction.operand2);
+                    p.noInstructions += 1;
                     break;
                 case "MOV":
                     p.ARF.set(instruction.operand1, p.ARF.get(instruction.operand2));
+                    p.noInstructions += 1;
                     break;
                 case "MOVPC":
                     p.ARF.set(instruction.operand1, instruction.PC);
+                    p.noInstructions += 1;
                     break;
                 case "ADDi":
                     p.ARF.set(instruction.operand1, p.ARF.get(instruction.operand1) + instruction.operand2);
+                    p.noInstructions += 1;
                     break;
                 case "ADD":
                     p.ARF.set(instruction.operand1, p.ARF.get(instruction.operand2) + p.ARF.get(instruction.operand3));
+                    p.noInstructions += 1;
                     break;
                 case "SUBi":
                     p.ARF.set(instruction.operand1, p.ARF.get(instruction.operand1) - instruction.operand2);
+                    p.noInstructions += 1;
                     break;
                 case "SUB":
                     p.ARF.set(instruction.operand1, p.ARF.get(instruction.operand2) - p.ARF.get(instruction.operand3));
+                    p.noInstructions += 1;
                     break;
                 case "MUL":
                     if (cyclesToGo < 0) {
                         cyclesToGo = 3;
                     } else if (cyclesToGo == 0) {
                         p.ARF.set(instruction.operand1, p.ARF.get(instruction.operand2) * p.ARF.get(instruction.operand3));
+                        p.noInstructions += 1;
                     }
                     break;
                 case "DIV":
@@ -67,6 +74,7 @@ public class Execute implements Module {
                         cyclesToGo = 3;
                     } else if (cyclesToGo == 0) {
                         p.ARF.set(instruction.operand1, p.ARF.get(instruction.operand2) / p.ARF.get(instruction.operand3));
+                        p.noInstructions += 1;
                     }
                     break;
                 case "CMP":
@@ -79,45 +87,53 @@ public class Execute implements Module {
                     } else {
                         p.f = 1;
                     }
+                    p.noInstructions += 1;
                     break;
                 case "BEQ":
                     if (p.f == 0) {
                         p.ARF.set(30, instruction.operand1 - 1);
                         invalidatePipeline();
                     }
+                    p.noInstructions += 1;
                     break;
                 case "BNE":
                     if (p.f != 0) {
                         p.ARF.set(30, instruction.operand1 - 1);
                         invalidatePipeline();
                     }
+                    p.noInstructions += 1;
                     break;
                 case "BLT":
                     if (p.f == -1) {
                         p.ARF.set(30, instruction.operand1 - 1);
                         invalidatePipeline();
                     }
+                    p.noInstructions += 1;
                     break;
                 case "BGT":
                     if (p.f == 1) {
                         p.ARF.set(30, instruction.operand1 - 1);
                         invalidatePipeline();
                     }
+                    p.noInstructions += 1;
                     break;
                 case "B":
                     p.ARF.set(30, instruction.operand1 - 1);
                     invalidatePipeline();
+                    p.noInstructions += 1;
                     break;
                 case "BR":
 //                    stepMode = true;
                     p.ARF.set(30, p.ARF.get(instruction.operand1));
                     invalidatePipeline();
+                    p.noInstructions += 1;
                     break;
                 case "LDRi":
                     if (cyclesToGo < 0) {
                         cyclesToGo = 3;
                     } else if (cyclesToGo == 0) {
                         p.ARF.set(instruction.operand1, p.MEM.get(p.ARF.get(instruction.operand2) + instruction.operand3));
+                        p.noInstructions += 1;
                     }
                     break;
                 case "LDR":
@@ -125,6 +141,7 @@ public class Execute implements Module {
                         cyclesToGo = 3;
                     } else if (cyclesToGo == 0) {
                         p.ARF.set(instruction.operand1, p.MEM.get(p.ARF.get(instruction.operand2) + p.ARF.get(instruction.operand3)));
+                        p.noInstructions += 1;
                     }
                     break;
                 case "STRi":
@@ -132,6 +149,7 @@ public class Execute implements Module {
                         cyclesToGo = 3;
                     } else if (cyclesToGo == 0) {
                         p.MEM.set(p.ARF.get(instruction.operand2) + instruction.operand3, p.ARF.get(instruction.operand1));
+                        p.noInstructions += 1;
                     }
                     break;
                 case "STR":
@@ -139,12 +157,15 @@ public class Execute implements Module {
                         cyclesToGo = 3;
                     } else if (cyclesToGo == 0) {
                         p.MEM.set(p.ARF.get(instruction.operand2) + p.ARF.get(instruction.operand3), p.ARF.get(instruction.operand1));
+                        p.noInstructions += 1;
                     }
                     break;
                 case "NOP":
+                    p.noInstructions += 1;
                     break;
                 case "HALT":
                     p.fin = true;
+                    p.noInstructions += 1;
                     break;
                 default:
                     System.out.println("opcode " + instruction.opcode + " not recognised");
