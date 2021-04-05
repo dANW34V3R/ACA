@@ -56,9 +56,19 @@ public class Main {
         for (int i = 0; i <instructionStringsWithoutLabels.size(); i++) {
             String[] insStringSplit = instructionStringsWithoutLabels.get(i).split(" ");
 
-//            System.out.println(instructionStringsWithoutLabels.get(i));
+            // Won't catch all errors e.g. [R30 in LDR and STR
+            for (int k = 1; k < insStringSplit.length; k++) {
+                if (insStringSplit[k].compareTo("R30") == 0) {
+                    throw new java.lang.Error("Cannot directly use PC around line " + i);
+                }
+            }
 
-            if (insStringSplit[0].charAt(0) == 'B') {
+//            System.out.println(instructionStringsWithoutLabels.get(i));
+            if (insStringSplit[0].compareTo("BR") == 0) {
+                instructions.add(new Instruction(insStringSplit[0], Integer.parseInt(insStringSplit[1].substring(1)), 0, 0));
+            } else if (insStringSplit[0].compareTo("MOVPC") == 0) {
+                instructions.add(new Instruction(insStringSplit[0], Integer.parseInt(insStringSplit[1].substring(1)), 0, 0));
+            } else if (insStringSplit[0].charAt(0) == 'B') {
                 // branch instruction
                 operand1 = labelToAddr.get(insStringSplit[1]);
                 if (operand1 == null) {

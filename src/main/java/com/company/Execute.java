@@ -1,9 +1,14 @@
 package com.company;
 
+import java.io.*;
+import java.nio.charset.Charset;
+import java.util.Scanner;
+
 public class Execute implements Module {
 
     Processor p;
     int cyclesToGo = 0;
+    private boolean stepMode = false;
 
     public Execute(Processor proc) {
         p = proc;
@@ -33,11 +38,10 @@ public class Execute implements Module {
                     p.ARF.set(instruction.operand1, instruction.operand2);
                     break;
                 case "MOV":
-                    if (instruction.operand2 == 30) {
-                        p.ARF.set(instruction.operand1, instruction.PC);
-                    } else {
-                        p.ARF.set(instruction.operand1, p.ARF.get(instruction.operand2));
-                    }
+                    p.ARF.set(instruction.operand1, p.ARF.get(instruction.operand2));
+                    break;
+                case "MOVPC":
+                    p.ARF.set(instruction.operand1, instruction.PC);
                     break;
                 case "ADDi":
                     p.ARF.set(instruction.operand1, p.ARF.get(instruction.operand1) + instruction.operand2);
@@ -104,13 +108,15 @@ public class Execute implements Module {
                     p.ARF.set(30, instruction.operand1 - 1);
                     invalidatePipeline();
                     break;
+                case "BR":
+//                    stepMode = true;
+                    p.ARF.set(30, p.ARF.get(instruction.operand1));
+                    invalidatePipeline();
+                    break;
                 case "LDRi":
                     if (cyclesToGo < 0) {
                         cyclesToGo = 3;
                     } else if (cyclesToGo == 0) {
-                        if (instruction.operand1 == 30) {
-                            invalidatePipeline();
-                        }
                         p.ARF.set(instruction.operand1, p.MEM.get(p.ARF.get(instruction.operand2) + instruction.operand3));
                     }
                     break;
@@ -118,9 +124,6 @@ public class Execute implements Module {
                     if (cyclesToGo < 0) {
                         cyclesToGo = 3;
                     } else if (cyclesToGo == 0) {
-                        if (instruction.operand1 == 30) {
-                            invalidatePipeline();
-                        }
                         p.ARF.set(instruction.operand1, p.MEM.get(p.ARF.get(instruction.operand2) + p.ARF.get(instruction.operand3)));
                     }
                     break;
@@ -146,6 +149,17 @@ public class Execute implements Module {
                 default:
                     System.out.println("opcode " + instruction.opcode + " not recognised");
                     break;
+            }
+        }
+
+        if (stepMode) {
+            try {
+                BufferedReader keyboard = new BufferedReader(new InputStreamReader(System.in, "UTF-8"));
+                byte dataBytes[] = keyboard.readLine().getBytes(Charset.forName("UTF-8"));
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
     }

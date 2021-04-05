@@ -10,7 +10,7 @@ B return
 else:
 STR R0 [R31 #0]
 SUB R0 #1
-MOV R4 R30
+MOVPC R4
 ADD R4 #4
 STR R4 [R31 #1]
 ADD R31 #2
@@ -22,6 +22,7 @@ CMP R31 R2
 BEQ end
 SUB R31 #2
 LDR R0 [R31 #0]
-LDR R30 [R31 #1]
+LDR R20 [R31 #1]
+BR R20
 end:
 HALT
