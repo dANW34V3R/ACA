@@ -52,7 +52,7 @@ public class Processor {
             cycles += 1;
             System.out.println("FE:" + insD.nextInstruction.toString());
             System.out.println("DE:" + insI.nextInstruction.toString());
-            System.out.println("IS:" + insE.nextInstruction.toString());
+//            System.out.println("IS:" + insE.nextInstruction.toString());
 //            System.out.println("EX:" + executeInstruction.toString());
             System.out.println("Execution unit blocked: " + insE.blocked());
             System.out.println(ARF.toString() + "flag=" + f + ",PC=" + ARF.get(30));
