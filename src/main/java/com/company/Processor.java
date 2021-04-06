@@ -18,7 +18,8 @@ public class Processor {
 
     // Modules
     public Execute insE = new Execute(this);
-    public Decode insD = new Decode(this, insE);
+    public Issue insI =  new Issue(this, insE);
+    public Decode insD = new Decode(this, insI);
     public Fetch insF = new Fetch(this, insD);
 
 
@@ -35,7 +36,7 @@ public class Processor {
         for (int i = 0; i < memory.size(); i++ ) {
             MEM.set(i, memory.get(i));
         }
-        insE.setFrontEnd(Arrays.asList(insF, insD));
+        insE.setFrontEnd(Arrays.asList(insF, insD, insI));
         System.out.println(MEM.toString());
         System.out.println(ARF.toString());
         go();
@@ -45,11 +46,13 @@ public class Processor {
 
         while (!fin) {
             insE.tick();
+            insI.tick();
             insD.tick();
             insF.tick();
             cycles += 1;
             System.out.println("FE:" + insD.nextInstruction.toString());
-            System.out.println("DE:" + insE.nextInstruction.toString());
+            System.out.println("DE:" + insI.nextInstruction.toString());
+            System.out.println("IS:" + insE.nextInstruction.toString());
 //            System.out.println("EX:" + executeInstruction.toString());
             System.out.println("Execution unit blocked: " + insE.blocked());
             System.out.println(ARF.toString() + "flag=" + f + ",PC=" + ARF.get(30));
