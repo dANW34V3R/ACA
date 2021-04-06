@@ -17,13 +17,14 @@ public class Processor {
     public int f;
 
     // Modules
-    public Fetch insF = new Fetch(this);
-    public Decode insD = new Decode(this);
     public Execute insE = new Execute(this);
+    public Decode insD = new Decode(this, insE);
+    public Fetch insF = new Fetch(this, insD);
 
-    public Instruction fetchInstruction = new Instruction("NOP",0,0,0);
-    public Instruction decodeInstruction = new Instruction("NOP",0,0,0);
-    public Instruction executeInstruction = new Instruction("NOP",0,0,0);;
+
+//    public Instruction fetchInstruction = new Instruction("NOP",0,0,0);
+//    public Instruction decodeInstruction = new Instruction("NOP",0,0,0);
+//    public Instruction executeInstruction = new Instruction("NOP",0,0,0);;
 
     private int tick = 0;
     private int cycles = 0;
@@ -34,6 +35,7 @@ public class Processor {
         for (int i = 0; i < memory.size(); i++ ) {
             MEM.set(i, memory.get(i));
         }
+        insE.setFrontEnd(Arrays.asList(insF, insD));
         System.out.println(MEM.toString());
         System.out.println(ARF.toString());
         go();
@@ -46,9 +48,9 @@ public class Processor {
             insD.tick();
             insF.tick();
             cycles += 1;
-            System.out.println("FE:" + fetchInstruction.toString());
-            System.out.println("DE:" + decodeInstruction.toString());
-            System.out.println("EX:" + executeInstruction.toString());
+            System.out.println("FE:" + insD.nextInstruction.toString());
+            System.out.println("DE:" + insE.nextInstruction.toString());
+//            System.out.println("EX:" + executeInstruction.toString());
             System.out.println("Execution unit blocked: " + insE.blocked());
             System.out.println(ARF.toString() + "flag=" + f + ",PC=" + ARF.get(30));
             System.out.println(MEM.toString());

@@ -2,12 +2,16 @@ package com.company;
 
 import java.io.*;
 import java.nio.charset.Charset;
+import java.util.List;
 
 public class Execute implements Module {
 
     Processor p;
     int cyclesToGo = 0;
     private boolean stepMode = false;
+    public Instruction nextInstruction = new Instruction("NOP", 0, 0,0);
+
+    List<? extends Module> frontEnd;
 
     public Execute(Processor proc) {
         p = proc;
@@ -18,8 +22,23 @@ public class Execute implements Module {
         return cyclesToGo > 0;
     }
 
+    @Override
+    public void setNextInstruction(Instruction instruction) {
+        nextInstruction = instruction;
+    }
+
+    @Override
+    public void invalidateCurrentInstruction() {}
+
+    public void setFrontEnd(List<? extends Module> frontEndList) {
+        frontEnd = frontEndList;
+    }
+
     private void invalidatePipeline() {
-        p.fetchInstruction.valid = false;
+        for (Module module : frontEnd) {
+            module.invalidateCurrentInstruction();
+        }
+//        p.fetchInstruction.valid = false;
 //        p.decodeInstruction.valid = false;
     }
 
@@ -27,9 +46,7 @@ public class Execute implements Module {
     public void tick() {
         cyclesToGo -= 1;
 
-        Instruction instruction = p.decodeInstruction;
-        p.executeInstruction = instruction;
-//        System.out.println("EX:" + instruction.toString() + instruction.valid);
+        Instruction instruction = nextInstruction;
 
         if (instruction.valid) {
             switch (instruction.opcode) {

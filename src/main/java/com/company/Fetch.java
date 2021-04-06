@@ -1,11 +1,15 @@
 package com.company;
 
+import com.sun.istack.internal.Nullable;
+
 public class Fetch implements Module{
 
     Processor p;
+    Module nextModule;
 
-    public Fetch(Processor proc) {
+    public Fetch(Processor proc, Module next) {
         p = proc;
+        nextModule = next;
     }
 
     @Override
@@ -15,17 +19,23 @@ public class Fetch implements Module{
             p.ARF.set(30, p.ARF.get(30) + 1);
             if (p.INSMEM.size() - 1 < p.ARF.get(30)) {
                 // NOP to prevent out of bounds error at end of program due to pipelining
-                p.fetchInstruction = new Instruction("NOP", 0, 0, 0);
+                nextModule.setNextInstruction(new Instruction("NOP", 0, 0, 0));
             } else {
                 // Create new instructions object to prevent values sticking e.g. valid
-                p.fetchInstruction = new Instruction(p.INSMEM.get(p.ARF.get(30)));
-                p.fetchInstruction.PC = p.ARF.get(30);
+                nextModule.setNextInstruction(new Instruction(p.INSMEM.get(p.ARF.get(30)), p.ARF.get(30)));
             }
         }
     }
 
     @Override
     public boolean blocked() {
-        return p.insD.blocked();
+        return nextModule.blocked();
     }
+
+    @Override
+    public void setNextInstruction(Instruction instruction) {}
+
+    @Override
+    public void invalidateCurrentInstruction() {}
+
 }

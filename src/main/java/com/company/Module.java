@@ -6,4 +6,8 @@ public interface Module {
 
     boolean blocked();
 
+    void setNextInstruction(Instruction instruction);
+
+    void invalidateCurrentInstruction();
+
 }
