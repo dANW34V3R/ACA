@@ -1,7 +1,5 @@
 package com.company;
 
-import com.sun.istack.internal.Nullable;
-
 public class Fetch implements Module{
 
     Processor p;
@@ -33,7 +31,7 @@ public class Fetch implements Module{
     }
 
     @Override
-    public void setNextInstruction(Instruction instruction) {}
+    public boolean setNextInstruction(Instruction instruction) {return true;}
 
     @Override
     public void invalidateCurrentInstruction() {}

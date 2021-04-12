@@ -9,11 +9,13 @@ public class Decode implements Module{
     public Decode(Processor proc, Module next) {
         p = proc;
         nextModule = next;
+        nextInstruction.valid = false;
     }
 
 
     @Override
     public void tick() {
+        System.out.println("DECODE" + blocked());
         if (!blocked()) {
             nextModule.setNextInstruction(nextInstruction);
         }
@@ -25,8 +27,9 @@ public class Decode implements Module{
     }
 
     @Override
-    public void setNextInstruction(Instruction instruction) {
+    public boolean setNextInstruction(Instruction instruction) {
         nextInstruction = instruction;
+        return true;
     }
 
     @Override

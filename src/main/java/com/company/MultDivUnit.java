@@ -1,12 +1,21 @@
 package com.company;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class MultDivUnit implements Module{
 
     Processor p;
+    Module nextModule;
+
     public Instruction nextInstruction = new Instruction("NOP", 0, 0, 0);
 
-    public MultDivUnit(Processor proc) {
+    int RSsize = 4;
+    List<RSEntry> RS = new ArrayList<>();
+
+    public MultDivUnit(Processor proc, Module next){
         p = proc;
+        nextModule = next;
     }
 
     @Override
@@ -68,8 +77,9 @@ public class MultDivUnit implements Module{
     }
 
     @Override
-    public void setNextInstruction(Instruction instruction) {
+    public boolean setNextInstruction(Instruction instruction) {
         nextInstruction = instruction;
+        return true;
     }
 
     @Override

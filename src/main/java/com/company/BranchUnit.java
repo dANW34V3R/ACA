@@ -2,16 +2,23 @@ package com.company;
 
 import com.sun.org.apache.xpath.internal.operations.Mod;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class BranchUnit implements Module{
 
     Processor p;
+    Module nextModule;
+
     List<? extends Module> frontEnd;
     public Instruction nextInstruction = new Instruction("NOP", 0, 0,0);
 
-    public BranchUnit(Processor proc){
+    int RSsize = 4;
+    List<RSEntry> RS = new ArrayList<>();
+
+    public BranchUnit(Processor proc, Module next){
         p = proc;
+        nextModule = next;
     }
 
     public void setFrontEnd(List<? extends Module> frontEndList) {
@@ -79,7 +86,6 @@ public class BranchUnit implements Module{
                     p.noInstructions += 1;
                     break;
                 case "BR":
-//                    stepMode = true;
                     p.ARF.set(30, p.ARF.get(instruction.operand1));
                     invalidatePipeline();
                     p.noInstructions += 1;
@@ -97,8 +103,9 @@ public class BranchUnit implements Module{
     }
 
     @Override
-    public void setNextInstruction(Instruction instruction) {
+    public boolean setNextInstruction(Instruction instruction) {
         nextInstruction = instruction;
+        return true;
     }
 
     @Override
