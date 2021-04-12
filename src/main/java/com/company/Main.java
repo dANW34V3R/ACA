@@ -118,19 +118,19 @@ public class Main {
             } else {
                 // All other instructions (this isn't very nice but works)
                 if (insStringSplit.length == 1) {
-                    instructions.add(new Instruction(insStringSplit[0], 0,0,0));
+                    instructions.add(new Instruction(insStringSplit[0].toUpperCase(), 0,0,0));
                 } else if (insStringSplit.length == 2) {
                     operand1 = Integer.parseInt(insStringSplit[1].substring(1));
-                    instructions.add(new Instruction(insStringSplit[0], operand1,0,0));
+                    instructions.add(new Instruction(insStringSplit[0].toUpperCase(), operand1,0,0));
                 } else if (insStringSplit.length == 3) {
                     operand1 = Integer.parseInt(insStringSplit[1].substring(1));
                     operand2 = Integer.parseInt(insStringSplit[2].substring(1));
-                    instructions.add(new Instruction(insStringSplit[0], operand1,operand2,0));
+                    instructions.add(new Instruction(insStringSplit[0].toUpperCase(), operand1,operand2,0));
                 } else if (insStringSplit.length == 4) {
                     operand1 = Integer.parseInt(insStringSplit[1].substring(1));
                     operand2 = Integer.parseInt(insStringSplit[2].substring(1));
                     operand3 = Integer.parseInt(insStringSplit[3].substring(1));
-                    instructions.add(new Instruction(insStringSplit[0], operand1,operand2,operand3));
+                    instructions.add(new Instruction(insStringSplit[0].toUpperCase(), operand1,operand2,operand3));
                 }
             }
 

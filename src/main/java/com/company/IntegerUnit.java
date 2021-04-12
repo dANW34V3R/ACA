@@ -20,13 +20,11 @@ public class IntegerUnit implements Module{
     @Override
     public void tick() {
 
-        Instruction instruction;
-
         Optional<RSEntry> entry = RS.stream().filter(rsEntry -> rsEntry.val1 != null && rsEntry.val2 != null).findFirst();
 
         if (entry.isPresent()) {
             RSEntry validEntry = entry.get();
-//            instruction = new Instruction(validEntry.opcode, validEntry.ROBdestination, validEntry.val1, validEntry.val2);
+
             RS.remove(validEntry);
 
             // WB, ROB entry , value, unused
@@ -39,7 +37,6 @@ public class IntegerUnit implements Module{
                     break;
                 case "MOV":
                     WBins.operand2 = validEntry.val1;
-//                    p.ARF.set(instruction.operand1, p.ARF.get(instruction.operand2));
                     break;
                 case "ADDi":
                 case "ADD":
@@ -50,13 +47,12 @@ public class IntegerUnit implements Module{
                     WBins.operand2 = validEntry.val1 - validEntry.val2;
                     break;
                 case "NOP":
-                    WBins = null;
                     p.noInstructions -= 1;
                     break;
                 case "HALT":
                     break;
                 default:
-                    throw new java.lang.Error("opcode " + validEntry.opcode + " not recognised");
+                    throw new java.lang.Error("opcode " + validEntry.opcode + " not recognised by IntegerUnit");
             }
             nextModule.setNextInstruction(WBins);
         }
@@ -79,6 +75,10 @@ public class IntegerUnit implements Module{
             }
             // Add ROB entry
             ROBindex = p.addROB(new ROBEntry(instruction.operand1, 0, false));
+            if (instruction.opcode.compareTo("NOP") == 0) {
+                p.ROB.get(ROBindex).WB = false;
+//                System.out.println("NOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOP");
+            }
             // Add RS entry
             Integer RATtag1 = null;
             Integer val1 = null;
@@ -89,10 +89,18 @@ public class IntegerUnit implements Module{
                 RATtag1 = p.RAT.get(instruction.operand2);
                 if (RATtag1 == null) {
                     val1 = p.ARF.get(instruction.operand2);
+                } else if (p.ROB.get(RATtag1).ready) {
+                    // Check whether value is already available
+                    val1 = p.ROB.get(RATtag1).value;
+                    RATtag1 = null;
                 }
                 RATtag2 = p.RAT.get(instruction.operand3);
                 if (RATtag2 == null) {
                     val2 = p.ARF.get(instruction.operand3);
+                } else if (p.ROB.get(RATtag2).ready) {
+                    // Check whether value is already available
+                    val2 = p.ROB.get(RATtag2).value;
+                    RATtag2 = null;
                 }
                 if (instruction.opcode.compareTo("MOV") == 0) {
                     val2 = -1; //ignored
@@ -107,6 +115,10 @@ public class IntegerUnit implements Module{
                 RATtag1 = p.RAT.get(instruction.operand1);
                 if (RATtag1 == null) {
                     val1 = p.ARF.get(instruction.operand1);
+                } else if (p.ROB.get(RATtag1).ready) {
+                    // Check whether value is already available
+                    val1 = p.ROB.get(RATtag1).value;
+                    RATtag1 = null;
                 }
                 val2 = instruction.operand2;
             }

@@ -43,7 +43,7 @@ public class Issue implements Module{
                         System.out.println("loadStoreUnit");
                         blocked = !nextModule.loadStoreUnit.setNextInstruction(nextInstruction);
                     } else {
-                        throw new java.lang.Error("Unrecognised opcode in Issue");
+                        throw new java.lang.Error("Unrecognised opcode in Issue: '" + nextInstruction.opcode + "'");
                     }
                 }
             } else {

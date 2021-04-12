@@ -19,12 +19,12 @@ public class Execute implements Module {
         p = proc;
         nextModule = next;
         intUnit = new IntegerUnit(p, nextModule);
-//        multDivUnit = new MultDivUnit(p, nextModule);
+        multDivUnit = new MultDivUnit(p, nextModule);
 //        branchUnit = new BranchUnit(p, nextModule);
 //        loadStoreUnit = new LoadStoreUnit(p, nextModule);
 
         nextModule.intUnit = intUnit;
-//        nextModule.multDivUnit = multDivUnit;
+        nextModule.multDivUnit = multDivUnit;
 //        nextModule.branchUnit = branchUnit;
 //        nextModule.loadStoreUnit = loadStoreUnit;
     }
@@ -50,7 +50,7 @@ public class Execute implements Module {
     @Override
     public void tick() {
         intUnit.tick();
-//        multDivUnit.tick();
+        multDivUnit.tick();
 //        branchUnit.tick();
 //        loadStoreUnit.tick();
     }

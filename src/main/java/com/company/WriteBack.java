@@ -1,15 +1,20 @@
 package com.company;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
 public class WriteBack implements Module{
 
     Processor p;
-    private Instruction todoInstruction = null;
-    public Instruction nextInstruction = null;
+    public Optional<Instruction> nextInstruction = Optional.empty();
 
     public IntegerUnit intUnit;
     public MultDivUnit multDivUnit;
     public BranchUnit branchUnit;
     public LoadStoreUnit loadStoreUnit;
+
+    public List<Instruction> WBqueue = new ArrayList<>();
 
     public WriteBack(Processor proc) {
         p = proc;
@@ -18,17 +23,20 @@ public class WriteBack implements Module{
 
     @Override
     public void tick() {
-        if (nextInstruction != null) {
-            p.ROB.get(nextInstruction.operand1).value = nextInstruction.operand2;
-            p.ROB.get(nextInstruction.operand1).ready = true;
+        if (nextInstruction.isPresent()) {
+            Instruction nextInstructionValue = nextInstruction.get();
+            System.out.println(nextInstructionValue.toString());
+            p.ROB.get(nextInstructionValue.operand1).value = nextInstructionValue.operand2;
+            p.ROB.get(nextInstructionValue.operand1).ready = true;
 
-            if (p.ROB.get(nextInstruction.operand1).WB == true) {
+            if (p.ROB.get(nextInstructionValue.operand1).WB == true) {
                 // Broadcast value
-                intUnit.updateRS(nextInstruction.operand1, nextInstruction.operand2);
+                intUnit.updateRS(nextInstructionValue.operand1, nextInstructionValue.operand2);
             }
+            WBqueue.remove(0);
         }
-        nextInstruction = todoInstruction;
-        todoInstruction = null;
+        System.out.println(WBqueue.toString());
+        nextInstruction = WBqueue.stream().findFirst();
     }
 
     @Override
@@ -38,13 +46,14 @@ public class WriteBack implements Module{
 
     @Override
     public boolean setNextInstruction(Instruction instruction) {
-        todoInstruction = instruction;
+        System.out.println("WB SET NEXT" + instruction.toString());
+        WBqueue.add(instruction);
         return true;
     }
 
     @Override
     public void invalidateCurrentInstruction() {
-        nextInstruction.valid = false;
+        // TODO invalidate all instructions
     }
 
 }

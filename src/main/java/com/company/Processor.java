@@ -97,7 +97,9 @@ public class Processor {
             cycles += 1;
             System.out.println("FE:" + insD.nextInstruction.toString() + insF.blocked());
             System.out.println("DE:" + insI.nextInstruction.toString() + insD.blocked());
-            System.out.println("IS:" + insE.intUnit.RS.toString() + insI.blocked());
+            System.out.println("ISint:" + insE.intUnit.RS.toString() + insI.blocked());
+            System.out.println("ISmult:" + insE.multDivUnit.RS.toString() + insI.blocked());
+            System.out.println("WBqueue:" + insWB.WBqueue.toString());
 //            System.out.println("EX:" + executeInstruction.toString());
             System.out.println("Execution unit blocked: " + insE.blocked());
             System.out.println(ARF.toString() + "flag=" + f + ",PC=" + ARF.get(30));
