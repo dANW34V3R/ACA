@@ -32,6 +32,9 @@ public class WriteBack implements Module{
             if (p.ROB.get(nextInstructionValue.operand1).WB == true) {
                 // Broadcast value
                 intUnit.updateRS(nextInstructionValue.operand1, nextInstructionValue.operand2);
+                multDivUnit.updateRS(nextInstructionValue.operand1, nextInstructionValue.operand2);
+                // branch
+                // load store
             }
             WBqueue.remove(0);
         }
