@@ -19,17 +19,34 @@ public class MultDivUnit implements Module{
 
     @Override
     public void tick() {
+        stage3Tick();
+        stage2Tick();
+        stage1Tick();
+    }
 
+    private void stage1Tick() {
         // Find the first (oldest) entry in the RS that has all values
         Optional<RSEntry> entry = RS.stream().filter(rsEntry -> rsEntry.val1 != null && rsEntry.val2 != null).findFirst();
 
-
-
         if (entry.isPresent()) {
-            RSEntry validEntry = entry.get();
+            stage1EndInstruction = entry.get();
+            RS.remove(stage1EndInstruction);
+        } else {
+            stage1EndInstruction = null;
+        }
+    }
 
-            RS.remove(validEntry);
+    private RSEntry stage1EndInstruction = null;
 
+    private void stage2Tick(){stage2EndInstruction = stage1EndInstruction;}
+
+    private RSEntry stage2EndInstruction = null;
+
+    private void stage3Tick(){
+
+        RSEntry validEntry = stage2EndInstruction;
+
+        if (validEntry != null) {
             // WB, ROB entry , value, unused
             Instruction WBins = new Instruction("WB", validEntry.ROBdestination, 0, 0);
             p.noInstructions += 1;
@@ -47,41 +64,9 @@ public class MultDivUnit implements Module{
                 default:
                     throw new java.lang.Error("opcode " + validEntry.opcode + " not recognised in MultDivUnit");
             }
-
             nextModule.setNextInstruction(WBins);
         }
-
-//        stage3Tick();
-//        stage2Tick();
-//        stage1Tick();
     }
-
-//    private Instruction stage0EndInstruction = new Instruction("NOP", 0,0,0);
-//
-//    private void stage1Tick(){stage1EndInstruction = stage0EndInstruction;}
-//
-//    private Instruction stage1EndInstruction = new Instruction("NOP", 0,0,0);
-//
-//    private void stage2Tick(){stage2EndInstruction = stage1EndInstruction;}
-//
-//    private Instruction stage2EndInstruction = new Instruction("NOP", 0,0,0);
-//
-//    private void stage3Tick(){
-////        Instruction instruction = stage2EndInstruction;
-////        switch (instruction.opcode) {
-////            case "MUL":
-////                p.ARF.set(instruction.operand1, p.ARF.get(instruction.operand2) * p.ARF.get(instruction.operand3));
-////                p.noInstructions += 1;
-////                break;
-////            case "DIV":
-////                p.ARF.set(instruction.operand1, p.ARF.get(instruction.operand2) / p.ARF.get(instruction.operand3));
-////                p.noInstructions += 1;
-////                break;
-////            default:
-////                System.out.println("opcode " + instruction.opcode + " not recognised in MultDivUnit");
-////                break;
-////        }
-//    }
 
     @Override
     public boolean blocked() {
@@ -146,5 +131,11 @@ public class MultDivUnit implements Module{
                 }
             }
         }
+    }
+
+    public void printState() {
+        String s1 = stage1EndInstruction != null ? stage1EndInstruction.toString() : "NULL";
+        String s2 = stage2EndInstruction != null ? stage2EndInstruction.toString() : "NULL";
+        System.out.println(s1 + "+" + s2);
     }
 }

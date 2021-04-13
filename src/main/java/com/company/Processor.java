@@ -99,6 +99,7 @@ public class Processor {
             System.out.println("DE:" + insI.nextInstruction.toString() + insD.blocked());
             System.out.println("ISint:" + insE.intUnit.RS.toString() + insI.blocked());
             System.out.println("ISmult:" + insE.multDivUnit.RS.toString() + insI.blocked());
+            insE.multDivUnit.printState();
             System.out.println("WBqueue:" + insWB.WBqueue.toString());
 //            System.out.println("EX:" + executeInstruction.toString());
             System.out.println("Execution unit blocked: " + insE.blocked());
