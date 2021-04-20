@@ -120,7 +120,7 @@ public class IntegerUnit implements Module{
                 RS.add(new RSEntry(instruction.opcode, ROBindex, RATtag1, RATtag2, val1, val2));
 
                 return true;
-            } else {
+            } else if (Arrays.asList("MOV", "ADD", "SUB").contains(instruction.opcode)) {
                 ROBindex = p.addROB(new ROBEntry(2, instruction.operand1, 0, false));
 
                 // Add RS entry
@@ -153,17 +153,45 @@ public class IntegerUnit implements Module{
                     RATtag2 = null;
                 }
 
-                if (instruction.opcode.length() < 4) {
-                    // MOV, ADD, SUB
-                } else if (instruction.opcode.compareTo("MOVPC") == 0) {
+                RS.add(new RSEntry(instruction.opcode, ROBindex, RATtag1, RATtag2, val1, val2));
+                // Add RAT entry
+                p.RAT.set(instruction.operand1, ROBindex);
+                return true;
+            } else {
+
+                ROBindex = p.addROB(new ROBEntry(2, instruction.operand1, 0, false));
+
+                // Add RS entry
+                Integer RATtag1 = null;
+                Integer val1 = null;
+                Integer RATtag2 = null;
+                Integer val2 = null;
+
+                if (instruction.opcode.compareTo("MOVPC") == 0) {
                     val1 = -1; //ignored ignored but allows MOV to move through exe as all vals populated
                     val2 = instruction.PC;
                 } else {
-                    // MOVi, ADDi, SUBi and MOVPC
+                    // MOVi, ADDi, SUBi
                     // Use operand 2 as val2 as these are already provided by issue
-                    // val1 ignored for MOV
+                    // set val1
+
+                    if (instruction.opcode.compareTo("MOVi") == 0) {
+                        val1 = -1;
+                        RATtag1 = null;
+                    } else {
+                        RATtag1 = p.RAT.get(instruction.operand1);
+                        if (RATtag1 == null) {
+                            val1 = p.ARF.get(instruction.operand1);
+                        } else if (p.ROB.get(RATtag1).ready) {
+                            // Check whether value is already available
+                            val1 = p.ROB.get(RATtag1).value;
+                            RATtag1 = null;
+                        }
+                    }
+
                     val2 = instruction.operand2;
                 }
+
                 RS.add(new RSEntry(instruction.opcode, ROBindex, RATtag1, RATtag2, val1, val2));
                 // Add RAT entry
                 p.RAT.set(instruction.operand1, ROBindex);

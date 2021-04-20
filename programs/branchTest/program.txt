@@ -1,5 +1,8 @@
 B next
 ADD R18 R0
+MOV R0 #20
+ADD R0 #3
+SUB R0 #4
 HALT
 next:
 ADD R12 R0
