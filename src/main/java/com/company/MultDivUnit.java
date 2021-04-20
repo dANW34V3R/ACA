@@ -78,7 +78,7 @@ public class MultDivUnit implements Module{
         if (RS.size() < RSsize) {
             int ROBindex;
             // Add ROB entry
-            ROBindex = p.addROB(new ROBEntry(instruction.operand1, 0, false));
+            ROBindex = p.addROB(new ROBEntry(2, instruction.operand1, 0, false));
             // Add RS entry
             Integer RATtag1 = null;
             Integer val1 = null;
@@ -110,14 +110,13 @@ public class MultDivUnit implements Module{
 
     @Override
     public void invalidateCurrentInstruction() {
-        // TODO Invalidate all
-//        nextInstruction.valid = false;
+        RS.clear();
+        stage1EndInstruction = null;
+        stage2EndInstruction = null;
     }
 
     public void updateRS(int ROBdestination, int value) {
-        System.out.println(ROBdestination + ":" + value);
         for (RSEntry entry : RS) {
-            System.out.println(entry.toString());
             if (entry.tag1 != null) {
                 if (entry.tag1 == ROBdestination) {
                     entry.tag1 = null;

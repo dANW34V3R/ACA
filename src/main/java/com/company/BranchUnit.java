@@ -3,7 +3,9 @@ package com.company;
 import com.sun.org.apache.xpath.internal.operations.Mod;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 public class BranchUnit implements Module{
 
@@ -11,7 +13,6 @@ public class BranchUnit implements Module{
     Module nextModule;
 
     List<? extends Module> frontEnd;
-    public Instruction nextInstruction = new Instruction("NOP", 0, 0,0);
 
     int RSsize = 4;
     List<RSEntry> RS = new ArrayList<>();
@@ -34,66 +35,56 @@ public class BranchUnit implements Module{
     @Override
     public void tick() {
 
-        Instruction instruction = nextInstruction;
+        Optional<RSEntry> entry = RS.stream().filter(rsEntry -> rsEntry.val1 != null && rsEntry.val2 != null).findFirst();
 
-        if (instruction.valid) {
-            switch (instruction.opcode) {
+        if (entry.isPresent()) {
+            RSEntry validEntry = entry.get();
+
+            RS.remove(validEntry);
+
+            p.noInstructions += 1;
+
+            // WB, ROB entry , value, unused
+            Instruction WBins = new Instruction("WB", validEntry.ROBdestination, 0, 0);
+
+            switch (validEntry.opcode) {
                 case "NOP":
                     break;
-                case "CMP":
-                    //op1 - op2 , update flags
-                    int result = p.ARF.get(instruction.operand1) - p.ARF.get(instruction.operand2);
-                    if (result == 0) {
-                        p.f = 0;
-                    } else if (result < 0) {
-                        p.f = -1;
-                    } else {
-                        p.f = 1;
-                    }
-                    p.noInstructions += 1;
-                    break;
                 case "BEQ":
-                    if (p.f == 0) {
-                        p.ARF.set(30, instruction.operand1 - 1);
-                        invalidatePipeline();
+                    if (validEntry.val2 == 0) {
+//                        p.ARF.set(30, validEntry.val1 - 1);
+                        WBins.operand2 = validEntry.val1 - 1;
+                        p.ROB.get(validEntry.ROBdestination).misPredict = true;
                     }
-                    p.noInstructions += 1;
                     break;
                 case "BNE":
-                    if (p.f != 0) {
-                        p.ARF.set(30, instruction.operand1 - 1);
-                        invalidatePipeline();
+                    if (validEntry.val2 != 0) {
+                        WBins.operand2 = validEntry.val1 - 1;
+                        p.ROB.get(validEntry.ROBdestination).misPredict = true;
                     }
-                    p.noInstructions += 1;
                     break;
                 case "BLT":
-                    if (p.f == -1) {
-                        p.ARF.set(30, instruction.operand1 - 1);
-                        invalidatePipeline();
+                    if (validEntry.val2 == -1) {
+                        WBins.operand2 = validEntry.val1 - 1;
+                        p.ROB.get(validEntry.ROBdestination).misPredict = true;
                     }
-                    p.noInstructions += 1;
                     break;
                 case "BGT":
-                    if (p.f == 1) {
-                        p.ARF.set(30, instruction.operand1 - 1);
-                        invalidatePipeline();
+                    if (validEntry.val2 == 1) {
+                        WBins.operand2 = validEntry.val1 - 1;
+                        p.ROB.get(validEntry.ROBdestination).misPredict = true;
                     }
-                    p.noInstructions += 1;
-                    break;
-                case "B":
-                    p.ARF.set(30, instruction.operand1 - 1);
-                    invalidatePipeline();
-                    p.noInstructions += 1;
                     break;
                 case "BR":
-                    p.ARF.set(30, p.ARF.get(instruction.operand1));
-                    invalidatePipeline();
-                    p.noInstructions += 1;
+                case "B":
+                    WBins.operand2 = validEntry.val1 - 1;
+                    p.ROB.get(validEntry.ROBdestination).misPredict = true;
                     break;
                 default:
-                    System.out.println("opcode " + instruction.opcode + " not recognised");
+                    System.out.println("opcode " + validEntry.opcode + " not recognised");
                     break;
             }
+            nextModule.setNextInstruction(WBins);
         }
     }
 
@@ -104,12 +95,87 @@ public class BranchUnit implements Module{
 
     @Override
     public boolean setNextInstruction(Instruction instruction) {
-        nextInstruction = instruction;
-        return true;
+
+        if (RS.size() < RSsize) {
+            int ROBindex = p.addROB(new ROBEntry(0, 30, 0, false));
+
+            // Add RS entry
+            // Where to branch
+            Integer RATtag1 = null;
+            Integer val1 = instruction.operand1;
+
+            Integer RATtag2 = null;
+            Integer val2 = null;
+
+            if (instruction.opcode.compareTo("B") == 0) {
+                val2 = -2;
+            } else if (instruction.opcode.compareTo("BR") == 0) {
+
+                // set val1
+                RATtag1 = p.RAT.get(instruction.operand1);
+                if (RATtag1 == null) {
+                    val1 = p.ARF.get(instruction.operand1);
+                } else if (p.ROB.get(RATtag1).ready) {
+                    // Check whether value is already available
+                    val1 = p.ROB.get(RATtag1).value;
+                    RATtag1 = null;
+                }
+
+                val2 = -2;
+            } else {
+                // CMP value i.e. if to branch
+
+                // Search up through ROB
+                // Find most recent CMP
+                // If no CMP set val2 = p.f
+                // Else wait on CMP value
+
+                // TODO will break if first ins is branch
+                for (int i = ROBindex; i > p.ROBcommit - 1; i--) {
+                    // TODO mod
+                    if (p.ROB.get(i).type == 3) {
+                        if (p.ROB.get(i).ready) {
+                            p.f = p.ROB.get(i).value;
+                        } else {
+                            RATtag2 = i;
+                        }
+                        break;
+                    }
+                }
+
+                if (RATtag2 == null) {
+                    val2 = p.f;
+                }
+            }
+
+            // opcode, branch to, flag val
+            RS.add(new RSEntry(instruction.opcode, ROBindex, RATtag1, RATtag2, val1, val2));
+            // Add RAT entry
+            p.RAT.set(30, ROBindex);
+            return true;
+        }
+        return false;
     }
 
     @Override
     public void invalidateCurrentInstruction() {
-        nextInstruction.valid = false;
+        RS.clear();
+    }
+
+    public void updateRS(int ROBdestination, int value) {
+        for (RSEntry entry : RS) {
+            if (entry.tag1 != null) {
+                if (entry.tag1 == ROBdestination) {
+                    entry.tag1 = null;
+                    entry.val1 = value;
+                }
+            }
+            if (entry.tag2 != null) {
+                if (entry.tag2 == ROBdestination) {
+                    entry.tag2 = null;
+                    entry.val2 = value;
+                }
+            }
+        }
     }
 }

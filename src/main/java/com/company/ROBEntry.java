@@ -1,25 +1,19 @@
 package com.company;
 
 public class ROBEntry {
-    //type
+    //type 0 = branch, 1 = load/store, 2 = register, 3 = CMP, 4 = HALT
+    int type;
     int destinationRegister;
+    boolean misPredict = false;
     int value;
     boolean ready;
-    boolean WB = true;
-    boolean halt = false;
 
-    public ROBEntry(int destReg, int val, boolean readyVal) {
+
+    public ROBEntry(int typeVal, int destReg, int val, boolean readyVal) {
+        type = typeVal;
         destinationRegister = destReg;
         value = val;
         ready = readyVal;
-    }
-
-    public ROBEntry(int destReg, int val, boolean readyVal, boolean haltVal) {
-        destinationRegister = destReg;
-        value = val;
-        ready = readyVal;
-        halt = haltVal;
-        WB = !haltVal;
     }
 
     @Override

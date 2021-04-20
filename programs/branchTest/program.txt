@@ -1,0 +1,27 @@
+B next
+ADD R18 R0
+HALT
+next:
+ADD R12 R0
+CMP R0 R1
+BGT greater
+HALT
+greater:
+ADD R13 R0
+CMP R1 R0
+BLT less
+HALT
+less:
+ADD R14 R0
+CMP R0 R29
+BEQ equal
+HALT
+equal:
+ADD R15 R0
+CMP R0 R1
+BNE notequal
+HALT
+notequal:
+ADD R16 R0
+BR R9
+HALT

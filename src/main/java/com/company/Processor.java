@@ -54,6 +54,7 @@ public class Processor {
         ARF.set(6, 4);
         ARF.set(7, 1);
         ARF.set(8, 2);
+        ARF.set(9, 1);
 
 //        MOV R1 #-23
 //        MOV R2 #16
@@ -75,7 +76,7 @@ public class Processor {
         for (int i = 0; i < memory.size(); i++ ) {
             MEM.set(i, memory.get(i));
         }
-        insE.setFrontEnd(Arrays.asList(insF, insD, insI));
+        insE.setFrontEnd(Arrays.asList(insF, insD, insI, insE));
         System.out.println(MEM.toString());
         System.out.println(ARF.toString());
         System.out.println(ROBcommit + ":" + ROBissue + ":" + ROB.toString());
@@ -99,6 +100,7 @@ public class Processor {
             System.out.println("DE:" + insI.nextInstruction.toString() + insD.blocked());
             System.out.println("ISint:" + insE.intUnit.RS.toString() + insI.blocked());
             System.out.println("ISmult:" + insE.multDivUnit.RS.toString() + insI.blocked());
+            System.out.println("ISbranch:" + insE.branchUnit.RS.toString() + insI.blocked());
             insE.multDivUnit.printState();
             System.out.println("WBqueue:" + insWB.WBqueue.toString());
 //            System.out.println("EX:" + executeInstruction.toString());
@@ -146,5 +148,17 @@ public class Processor {
         ROBissue += 1;
         ROBissue = ROBissue % ROBSize;
         return tempROBissue;
+    }
+
+    public void clearPipelineAndReset(){
+        insF.invalidateCurrentInstruction();
+        insD.invalidateCurrentInstruction();
+        insI.invalidateCurrentInstruction();
+        insE.invalidateCurrentInstruction();
+        insWB.invalidateCurrentInstruction();
+        insC.invalidateCurrentInstruction();
+
+        RAT = new ArrayList<>(Collections.nCopies(32, null));
+        ROBissue = (ROBcommit + 1) % ROB.size();
     }
 }

@@ -20,12 +20,12 @@ public class Execute implements Module {
         nextModule = next;
         intUnit = new IntegerUnit(p, nextModule);
         multDivUnit = new MultDivUnit(p, nextModule);
-//        branchUnit = new BranchUnit(p, nextModule);
+        branchUnit = new BranchUnit(p, nextModule);
 //        loadStoreUnit = new LoadStoreUnit(p, nextModule);
 
         nextModule.intUnit = intUnit;
         nextModule.multDivUnit = multDivUnit;
-//        nextModule.branchUnit = branchUnit;
+        nextModule.branchUnit = branchUnit;
 //        nextModule.loadStoreUnit = loadStoreUnit;
     }
 
@@ -40,18 +40,23 @@ public class Execute implements Module {
     }
 
     @Override
-    public void invalidateCurrentInstruction() {}
+    public void invalidateCurrentInstruction() {
+        intUnit.invalidateCurrentInstruction();
+        multDivUnit.invalidateCurrentInstruction();
+        branchUnit.invalidateCurrentInstruction();
+//        loadStoreUnit.invalidateCurrentInstruction();
+    }
 
     public void setFrontEnd(List<? extends Module> frontEndList) {
         frontEnd = frontEndList;
-//        branchUnit.setFrontEnd(frontEndList);
+        branchUnit.setFrontEnd(frontEndList);
     }
 
     @Override
     public void tick() {
         intUnit.tick();
         multDivUnit.tick();
-//        branchUnit.tick();
+        branchUnit.tick();
 //        loadStoreUnit.tick();
     }
 }

@@ -1,6 +1,7 @@
 package com.company;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -46,6 +47,20 @@ public class IntegerUnit implements Module{
                 case "SUB":
                     WBins.operand2 = validEntry.val1 - validEntry.val2;
                     break;
+                case "CMP":
+                    //op1 - op2 , update flags
+                    int result = validEntry.val1 - validEntry.val2;
+                    if (result == 0) {
+//                        p.f = 0;
+                        WBins.operand2 = 0;
+                    } else if (result < 0) {
+//                        p.f = -1;
+                        WBins.operand2 = -1;
+                    } else {
+//                        p.f = 1;
+                        WBins.operand2 = 1;
+                    }
+                    break;
                 case "NOP":
                     p.noInstructions -= 1;
                     break;
@@ -69,49 +84,21 @@ public class IntegerUnit implements Module{
         if (RS.size() < RSsize) {
             int ROBindex;
             if (instruction.opcode.compareTo("HALT") == 0) {
-                ROBindex = p.addROB(new ROBEntry(instruction.operand1, 0, false, true));
+                ROBindex = p.addROB(new ROBEntry(4, -1, 0, false));
                 RS.add(new RSEntry(instruction.opcode, ROBindex, null, null, 0, 0));
                 return true;
             }
             // Add ROB entry
-            ROBindex = p.addROB(new ROBEntry(instruction.operand1, 0, false));
-            if (instruction.opcode.compareTo("NOP") == 0) {
-                p.ROB.get(ROBindex).WB = false;
-//                System.out.println("NOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOP");
-            }
-            // Add RS entry
-            Integer RATtag1 = null;
-            Integer val1 = null;
-            Integer RATtag2 = null;
-            Integer val2 = null;
-            if (instruction.opcode.length() < 4) {
-                // MOV, ADD, SUB, NOP
-                RATtag1 = p.RAT.get(instruction.operand2);
-                if (RATtag1 == null) {
-                    val1 = p.ARF.get(instruction.operand2);
-                } else if (p.ROB.get(RATtag1).ready) {
-                    // Check whether value is already available
-                    val1 = p.ROB.get(RATtag1).value;
-                    RATtag1 = null;
-                }
-                RATtag2 = p.RAT.get(instruction.operand3);
-                if (RATtag2 == null) {
-                    val2 = p.ARF.get(instruction.operand3);
-                } else if (p.ROB.get(RATtag2).ready) {
-                    // Check whether value is already available
-                    val2 = p.ROB.get(RATtag2).value;
-                    RATtag2 = null;
-                }
-                if (instruction.opcode.compareTo("MOV") == 0) {
-                    val2 = -1; //ignored
-                    RATtag2 = null;
-                }
-            } else if (instruction.opcode.compareTo("MOVPC") == 0) {
-                val1 = -1; //ignored
-                val2 = instruction.PC;
-            } else {
-                // MOVi, ADDi, SUBi and MOVPC
-                // val1 ignored for MOV
+            else if (Arrays.asList("CMP", "NOP").contains(instruction.opcode)) {
+                ROBindex = p.addROB(new ROBEntry(3, -1, 0, false));
+
+                // Add RS entry
+                Integer RATtag1 = null;
+                Integer val1 = null;
+                Integer RATtag2 = null;
+                Integer val2 = null;
+
+                // set val1
                 RATtag1 = p.RAT.get(instruction.operand1);
                 if (RATtag1 == null) {
                     val1 = p.ARF.get(instruction.operand1);
@@ -120,26 +107,79 @@ public class IntegerUnit implements Module{
                     val1 = p.ROB.get(RATtag1).value;
                     RATtag1 = null;
                 }
-                val2 = instruction.operand2;
+                // set val2
+                RATtag2 = p.RAT.get(instruction.operand2);
+                if (RATtag2 == null) {
+                    val2 = p.ARF.get(instruction.operand2);
+                } else if (p.ROB.get(RATtag2).ready) {
+                    // Check whether value is already available
+                    val2 = p.ROB.get(RATtag2).value;
+                    RATtag2 = null;
+                }
+
+                RS.add(new RSEntry(instruction.opcode, ROBindex, RATtag1, RATtag2, val1, val2));
+
+                return true;
+            } else {
+                ROBindex = p.addROB(new ROBEntry(2, instruction.operand1, 0, false));
+
+                // Add RS entry
+                Integer RATtag1 = null;
+                Integer val1 = null;
+                Integer RATtag2 = null;
+                Integer val2 = null;
+
+                // set val1
+                RATtag1 = p.RAT.get(instruction.operand2);
+                if (RATtag1 == null) {
+                    val1 = p.ARF.get(instruction.operand2);
+                } else if (p.ROB.get(RATtag1).ready) {
+                    // Check whether value is already available
+                    val1 = p.ROB.get(RATtag1).value;
+                    RATtag1 = null;
+                }
+                // set val2
+                RATtag2 = p.RAT.get(instruction.operand3);
+                if (RATtag2 == null) {
+                    val2 = p.ARF.get(instruction.operand3);
+                } else if (p.ROB.get(RATtag2).ready) {
+                    // Check whether value is already available
+                    val2 = p.ROB.get(RATtag2).value;
+                    RATtag2 = null;
+                }
+
+                if (instruction.opcode.compareTo("MOV") == 0) {
+                    val2 = -1; //ignored but allows MOV to move through exe as all vals populated
+                    RATtag2 = null;
+                }
+
+                if (instruction.opcode.length() < 4) {
+                    // MOV, ADD, SUB
+                } else if (instruction.opcode.compareTo("MOVPC") == 0) {
+                    val1 = -1; //ignored ignored but allows MOV to move through exe as all vals populated
+                    val2 = instruction.PC;
+                } else {
+                    // MOVi, ADDi, SUBi and MOVPC
+                    // Use operand 2 as val2 as these are already provided by issue
+                    // val1 ignored for MOV
+                    val2 = instruction.operand2;
+                }
+                RS.add(new RSEntry(instruction.opcode, ROBindex, RATtag1, RATtag2, val1, val2));
+                // Add RAT entry
+                p.RAT.set(instruction.operand1, ROBindex);
+                return true;
             }
-            RS.add(new RSEntry(instruction.opcode, ROBindex, RATtag1, RATtag2, val1, val2));
-            // Add RAT entry
-            p.RAT.set(instruction.operand1, ROBindex);
-            return true;
         }
         return false;
     }
 
     @Override
     public void invalidateCurrentInstruction() {
-        // TODO Invalidate all
-//        nextInstruction.valid = false;
+        RS.clear();
     }
 
     public void updateRS(int ROBdestination, int value) {
-        System.out.println(ROBdestination + ":" + value);
         for (RSEntry entry : RS) {
-            System.out.println(entry.toString());
             if (entry.tag1 != null) {
                 if (entry.tag1 == ROBdestination) {
                     entry.tag1 = null;

@@ -25,14 +25,15 @@ public class WriteBack implements Module{
     public void tick() {
         if (nextInstruction.isPresent()) {
             Instruction nextInstructionValue = nextInstruction.get();
-            System.out.println(nextInstructionValue.toString());
+            System.out.println("WB -> " + nextInstructionValue.toString());
             p.ROB.get(nextInstructionValue.operand1).value = nextInstructionValue.operand2;
             p.ROB.get(nextInstructionValue.operand1).ready = true;
 
-            if (p.ROB.get(nextInstructionValue.operand1).WB == true) {
+            if (p.ROB.get(nextInstructionValue.operand1).type == 2 || p.ROB.get(nextInstructionValue.operand1).type == 3) {
                 // Broadcast value
                 intUnit.updateRS(nextInstructionValue.operand1, nextInstructionValue.operand2);
                 multDivUnit.updateRS(nextInstructionValue.operand1, nextInstructionValue.operand2);
+                branchUnit.updateRS(nextInstructionValue.operand1, nextInstructionValue.operand2);
                 // branch
                 // load store
             }
@@ -56,7 +57,8 @@ public class WriteBack implements Module{
 
     @Override
     public void invalidateCurrentInstruction() {
-        // TODO invalidate all instructions
+        nextInstruction = Optional.empty();
+        WBqueue.clear();
     }
 
 }
