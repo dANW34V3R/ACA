@@ -23,7 +23,7 @@ public class Commit implements Module{
                     }
                 }
 
-                if (entry.type == 2) {
+                if (entry.type == 2 || entry.type == 1) {
                     p.ARF.set(entry.destinationRegister, entry.value);
 
                     // Update RAT
@@ -37,9 +37,16 @@ public class Commit implements Module{
                 }
                 if (entry.type == 4) {
                     p.fin = true;
+                    // allow all store instructions to update memory
+                    p.noInstructions += 2;
+                    p.insMEM.tick();
+                    p.insMEM.tick();
+//                    p.insMEM.tick();
                 }
 
-
+                if (entry.type == 5) {
+                    p.insE.loadStoreUnit.sendStoreToMem(p.ROBcommit);
+                }
 
                 p.ROB.set(p.ROBcommit, null);
                 p.ROBcommit += 1;

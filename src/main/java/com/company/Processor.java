@@ -29,7 +29,8 @@ public class Processor {
     // Modules
     public Commit insC = new Commit(this);
     public WriteBack insWB = new WriteBack(this);
-    public Execute insE = new Execute(this, insWB);
+    public Memory insMEM = new Memory(this);
+    public Execute insE = new Execute(this, insWB, insMEM);
     public Issue insI =  new Issue(this, insE);
     public Decode insD = new Decode(this, insI);
     public Fetch insF = new Fetch(this, insD);
@@ -77,6 +78,7 @@ public class Processor {
             MEM.set(i, memory.get(i));
         }
         insE.setFrontEnd(Arrays.asList(insF, insD, insI, insE));
+        insMEM.ldstrUnit = insE.loadStoreUnit;
         System.out.println(MEM.toString());
         System.out.println(ARF.toString());
         System.out.println(ROBcommit + ":" + ROBissue + ":" + ROB.toString());
@@ -89,6 +91,7 @@ public class Processor {
 
         while (!fin) {
             insC.tick();
+            insMEM.tick();
             insE.tick();
             insI.tick();
             insD.tick();
@@ -101,6 +104,7 @@ public class Processor {
             System.out.println("ISint:" + insE.intUnit.RS.toString() + insI.blocked());
             System.out.println("ISmult:" + insE.multDivUnit.RS.toString() + insI.blocked());
             System.out.println("ISbranch:" + insE.branchUnit.RS.toString() + insI.blocked());
+            System.out.println("LSQ:" + insE.loadStoreUnit.LSQ.toString() + insI.blocked());
             insE.multDivUnit.printState();
             System.out.println("WBqueue:" + insWB.WBqueue.toString());
 //            System.out.println("EX:" + executeInstruction.toString());
@@ -155,6 +159,7 @@ public class Processor {
         insD.invalidateCurrentInstruction();
         insI.invalidateCurrentInstruction();
         insE.invalidateCurrentInstruction();
+        insMEM.invalidateCurrentInstruction();
         insWB.invalidateCurrentInstruction();
         insC.invalidateCurrentInstruction();
 

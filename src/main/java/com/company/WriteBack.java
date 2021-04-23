@@ -26,16 +26,16 @@ public class WriteBack implements Module{
         if (nextInstruction.isPresent()) {
             Instruction nextInstructionValue = nextInstruction.get();
             System.out.println("WB -> " + nextInstructionValue.toString());
-            p.ROB.get(nextInstructionValue.operand1).value = nextInstructionValue.operand2;
+            p.ROB.get(nextInstructionValue.operand1).value = nextInstructionValue.operand2; // TODO can be null
             p.ROB.get(nextInstructionValue.operand1).ready = true;
 
-            if (p.ROB.get(nextInstructionValue.operand1).type == 2 || p.ROB.get(nextInstructionValue.operand1).type == 3) {
+            // If register update or CMP
+            if (p.ROB.get(nextInstructionValue.operand1).type == 2 || p.ROB.get(nextInstructionValue.operand1).type == 3 || p.ROB.get(nextInstructionValue.operand1).type == 1) {
                 // Broadcast value
                 intUnit.updateRS(nextInstructionValue.operand1, nextInstructionValue.operand2);
                 multDivUnit.updateRS(nextInstructionValue.operand1, nextInstructionValue.operand2);
                 branchUnit.updateRS(nextInstructionValue.operand1, nextInstructionValue.operand2);
-                // branch
-                // load store
+                loadStoreUnit.updateLSQ(nextInstructionValue.operand1, nextInstructionValue.operand2);
             }
             WBqueue.remove(0);
         }

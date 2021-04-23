@@ -15,18 +15,18 @@ public class Execute implements Module {
 
     List<? extends Module> frontEnd;
 
-    public Execute(Processor proc, WriteBack next) {
+    public Execute(Processor proc, WriteBack next, Memory memoryUnit) {
         p = proc;
         nextModule = next;
         intUnit = new IntegerUnit(p, nextModule);
         multDivUnit = new MultDivUnit(p, nextModule);
         branchUnit = new BranchUnit(p, nextModule);
-//        loadStoreUnit = new LoadStoreUnit(p, nextModule);
+        loadStoreUnit = new LoadStoreUnit(p, nextModule, memoryUnit);
 
         nextModule.intUnit = intUnit;
         nextModule.multDivUnit = multDivUnit;
         nextModule.branchUnit = branchUnit;
-//        nextModule.loadStoreUnit = loadStoreUnit;
+        nextModule.loadStoreUnit = loadStoreUnit;
     }
 
     @Override
@@ -44,7 +44,7 @@ public class Execute implements Module {
         intUnit.invalidateCurrentInstruction();
         multDivUnit.invalidateCurrentInstruction();
         branchUnit.invalidateCurrentInstruction();
-//        loadStoreUnit.invalidateCurrentInstruction();
+        loadStoreUnit.invalidateCurrentInstruction();
     }
 
     public void setFrontEnd(List<? extends Module> frontEndList) {
@@ -57,6 +57,6 @@ public class Execute implements Module {
         intUnit.tick();
         multDivUnit.tick();
         branchUnit.tick();
-//        loadStoreUnit.tick();
+        loadStoreUnit.tick();
     }
 }

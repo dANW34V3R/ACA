@@ -30,17 +30,17 @@ public class Issue implements Module{
                     // Decide which execution unit to go to
                     // Attempt to put instruction in RS, block if can't
                     if (Arrays.asList("MOV", "MOVi", "MOVPC", "ADDi", "ADD", "SUBi", "SUB", "CMP", "NOP", "HALT").contains(nextInstruction.opcode)) {
-                        System.out.println("intUnit");
+//                        System.out.println("intUnit");
                         blocked = !nextModule.intUnit.setNextInstruction(nextInstruction);
                         System.out.println("ISSUE" + blocked);
                     } else if (Arrays.asList("MUL", "DIV").contains(nextInstruction.opcode)) {
-                        System.out.println("multDivUnit");
+//                        System.out.println("multDivUnit");
                         blocked = !nextModule.multDivUnit.setNextInstruction(nextInstruction);
                     } else if (Arrays.asList("BEQ", "BNE", "BLT", "BGT", "B", "BR").contains(nextInstruction.opcode)) {
-                        System.out.println("branchUnit");
+//                        System.out.println("branchUnit");
                         blocked = !nextModule.branchUnit.setNextInstruction(nextInstruction);
                     } else if (Arrays.asList("LDRi", "LDR", "STRi", "STR").contains(nextInstruction.opcode)) {
-                        System.out.println("loadStoreUnit");
+//                        System.out.println("loadStoreUnit");
                         blocked = !nextModule.loadStoreUnit.setNextInstruction(nextInstruction);
                     } else {
                         throw new java.lang.Error("Unrecognised opcode in Issue: '" + nextInstruction.opcode + "'");
