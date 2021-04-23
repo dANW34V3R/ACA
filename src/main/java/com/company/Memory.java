@@ -7,8 +7,10 @@ import java.util.Optional;
 public class Memory implements Module{
 
     Processor p;
-    Instruction nextInstruction = null;
+//    Instruction nextInstruction = null;
     LoadStoreUnit ldstrUnit;
+
+    List<Instruction> queue = new ArrayList<>();
 
     public Memory(Processor proc) {
         p = proc;
@@ -25,8 +27,12 @@ public class Memory implements Module{
     }
 
     private void stage1Tick() {
-        stage1EndInstruction = nextInstruction;
-        nextInstruction = null;
+        if (queue.size() > 0) {
+            stage1EndInstruction = queue.get(0);
+            queue.remove(0);
+        } else {
+            stage1EndInstruction = null;
+        }
     }
 
     private Instruction stage1EndInstruction = null;
@@ -37,18 +43,17 @@ public class Memory implements Module{
 
     private void stage3Tick(){
         if (stage2EndInstruction != null) {
-            if (stage2EndInstruction.opcode.compareTo("load") == 0) {
-                ldstrUnit.sendLoad(p.MEM.get(stage2EndInstruction.operand1), stage2EndInstruction.operand2);
-            } else if (stage2EndInstruction.opcode.compareTo("store") == 0) {
-                p.MEM.set(stage2EndInstruction.operand1, stage2EndInstruction.operand3);
+            if (stage2EndInstruction.operand1 > -1 && stage2EndInstruction.operand1 < p.MEM.size()) {
+                if (stage2EndInstruction.opcode.compareTo("load") == 0) {
+                    ldstrUnit.sendLoad(p.MEM.get(stage2EndInstruction.operand1), stage2EndInstruction.operand2);
+                } else if (stage2EndInstruction.opcode.compareTo("store") == 0) {
+                    p.MEM.set(stage2EndInstruction.operand1, stage2EndInstruction.operand3);
+                } else {
+                    throw new Error("Unknown instruction in memory stage " + stage2EndInstruction.opcode);
+                }
             } else {
-                throw new Error("Unknown instruction in memory stage " + stage2EndInstruction.opcode);
+                System.out.println("Memory out of bounds error");
             }
-
-
-
-
-
         }
     }
 
@@ -59,13 +64,17 @@ public class Memory implements Module{
 
     @Override
     public boolean setNextInstruction(Instruction instruction) {
-        nextInstruction = instruction;
+        queue.add(instruction);
         return true;
     }
 
     @Override
     public void invalidateCurrentInstruction() {
-        stage1EndInstruction = null;
-        stage2EndInstruction = null;
+    }
+
+    public void printState() {
+        String s1 = stage1EndInstruction != null ? stage1EndInstruction.toString() : "NULL";
+        String s2 = stage2EndInstruction != null ? stage2EndInstruction.toString() : "NULL";
+        System.out.println(s1 + "+" + s2);
     }
 }

@@ -47,15 +47,15 @@ public class Processor {
     private boolean stepMode = false;
 
     public Processor(List<Instruction> instructions, List<Integer> memory) {
-        ARF.set(1, -23);
-        ARF.set(2, 16);
-        ARF.set(3, 45);
-        ARF.set(4, 5);
-        ARF.set(5, 3);
-        ARF.set(6, 4);
-        ARF.set(7, 1);
-        ARF.set(8, 2);
-        ARF.set(9, 1);
+//        ARF.set(1, -23);
+//        ARF.set(2, 16);
+//        ARF.set(3, 45);
+//        ARF.set(4, 5);
+//        ARF.set(5, 3);
+//        ARF.set(6, 4);
+//        ARF.set(7, 1);
+//        ARF.set(8, 2);
+//        ARF.set(9, 1);
 
 //        MOV R1 #-23
 //        MOV R2 #16
@@ -107,6 +107,8 @@ public class Processor {
             System.out.println("LSQ:" + insE.loadStoreUnit.LSQ.toString() + insI.blocked());
             insE.multDivUnit.printState();
             System.out.println("WBqueue:" + insWB.WBqueue.toString());
+            System.out.println("MEMqueue:" + insMEM.queue.toString());
+            insMEM.printState();
 //            System.out.println("EX:" + executeInstruction.toString());
             System.out.println("Execution unit blocked: " + insE.blocked());
             System.out.println(ARF.toString() + "flag=" + f + ",PC=" + ARF.get(30));

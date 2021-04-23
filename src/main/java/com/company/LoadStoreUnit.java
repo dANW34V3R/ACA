@@ -249,7 +249,7 @@ public class LoadStoreUnit implements Module{
 
         LSQ.remove(0);
         // type, address, sequence number, value
-        p.insMEM.setNextInstruction(new Instruction("store", storeEntry.address, storeEntry.sequenceNumber, storeEntry.strValVal));
+        memModule.setNextInstruction(new Instruction("store", storeEntry.address, storeEntry.sequenceNumber, storeEntry.strValVal));
     }
 
     public void sendLoad(int value, int sequenceNumber) {

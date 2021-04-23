@@ -76,6 +76,7 @@ public class BranchUnit implements Module{
                     }
                     break;
                 case "BR":
+                    validEntry.val1++;
                 case "B":
                     WBins.operand2 = validEntry.val1 - 1;
                     p.ROB.get(validEntry.ROBdestination).misPredict = true;
@@ -111,6 +112,7 @@ public class BranchUnit implements Module{
                 val2 = -2;
             } else if (instruction.opcode.compareTo("BR") == 0) {
 
+                val1 = null;
                 // set val1
                 RATtag1 = p.RAT.get(instruction.operand1);
                 if (RATtag1 == null) {
