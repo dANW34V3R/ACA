@@ -34,6 +34,7 @@ public class Processor {
     public Issue insI =  new Issue(this, insE);
     public Decode insD = new Decode(this, insI);
     public Fetch insF = new Fetch(this, insD);
+    public BranchPredictor BP = new BranchPredictor();
 
 
 //    public Instruction fetchInstruction = new Instruction("NOP",0,0,0);
@@ -168,6 +169,8 @@ public class Processor {
         insMEM.invalidateCurrentInstruction();
         insWB.invalidateCurrentInstruction();
         insC.invalidateCurrentInstruction();
+
+        BP.setPipelineFlush();
 
         RAT = new ArrayList<>(Collections.nCopies(32, null));
         ROBissue = (ROBcommit + 1) % ROB.size();

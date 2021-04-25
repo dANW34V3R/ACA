@@ -25,7 +25,7 @@ public class WriteBack implements Module{
     public void tick() {
         if (nextInstruction.isPresent()) {
             Instruction nextInstructionValue = nextInstruction.get();
-            System.out.println("WB -> " + nextInstructionValue.toString());
+//            System.out.println("WB -> " + nextInstructionValue.toString());
             p.ROB.get(nextInstructionValue.operand1).value = nextInstructionValue.operand2; // TODO can be null
             p.ROB.get(nextInstructionValue.operand1).ready = true;
 
@@ -39,7 +39,7 @@ public class WriteBack implements Module{
             }
             WBqueue.remove(0);
         }
-        System.out.println(WBqueue.toString());
+//        System.out.println(WBqueue.toString());
         nextInstruction = WBqueue.stream().findFirst();
     }
 
@@ -50,7 +50,7 @@ public class WriteBack implements Module{
 
     @Override
     public boolean setNextInstruction(Instruction instruction) {
-        System.out.println("WB SET NEXT" + instruction.toString());
+//        System.out.println("WB SET NEXT" + instruction.toString());
         WBqueue.add(instruction);
         return true;
     }

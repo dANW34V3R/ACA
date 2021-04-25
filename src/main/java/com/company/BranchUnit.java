@@ -45,7 +45,7 @@ public class BranchUnit implements Module{
             p.noInstructions += 1;
 
             // WB, ROB entry , value, unused
-            Instruction WBins = new Instruction("WB", validEntry.ROBdestination, 0, 0);
+            Instruction WBins = new Instruction("WB", validEntry.ROBdestination, 0, 0, p.ROB.get(validEntry.ROBdestination).instructionPC);
 
             switch (validEntry.opcode) {
                 case "NOP":
@@ -54,32 +54,42 @@ public class BranchUnit implements Module{
                     if (validEntry.val2 == 0) {
 //                        p.ARF.set(30, validEntry.val1 - 1);
                         WBins.operand2 = validEntry.val1 - 1;
-                        p.ROB.get(validEntry.ROBdestination).misPredict = true;
+                        p.ROB.get(validEntry.ROBdestination).branchExecuteTaken = true;
+//                        p.ROB.get(validEntry.ROBdestination).misPredict = !p.ROB.get(validEntry.ROBdestination).branchFetchTaken;
+                    } else {
+                        p.ROB.get(validEntry.ROBdestination).branchExecuteTaken = false;
+//                        p.ROB.get(validEntry.ROBdestination).misPredict = p.ROB.get(validEntry.ROBdestination).branchFetchTaken;
                     }
                     break;
                 case "BNE":
                     if (validEntry.val2 != 0) {
                         WBins.operand2 = validEntry.val1 - 1;
-                        p.ROB.get(validEntry.ROBdestination).misPredict = true;
+                        p.ROB.get(validEntry.ROBdestination).branchExecuteTaken = true;
+                    } else {
+                        p.ROB.get(validEntry.ROBdestination).branchExecuteTaken = false;
                     }
                     break;
                 case "BLT":
                     if (validEntry.val2 == -1) {
                         WBins.operand2 = validEntry.val1 - 1;
-                        p.ROB.get(validEntry.ROBdestination).misPredict = true;
+                        p.ROB.get(validEntry.ROBdestination).branchExecuteTaken = true;
+                    }else {
+                        p.ROB.get(validEntry.ROBdestination).branchExecuteTaken = false;
                     }
                     break;
                 case "BGT":
                     if (validEntry.val2 == 1) {
                         WBins.operand2 = validEntry.val1 - 1;
-                        p.ROB.get(validEntry.ROBdestination).misPredict = true;
+                        p.ROB.get(validEntry.ROBdestination).branchExecuteTaken = true;
+                    } else {
+                        p.ROB.get(validEntry.ROBdestination).branchExecuteTaken = false;
                     }
                     break;
                 case "BR":
                     validEntry.val1++;
                 case "B":
                     WBins.operand2 = validEntry.val1 - 1;
-                    p.ROB.get(validEntry.ROBdestination).misPredict = true;
+                    p.ROB.get(validEntry.ROBdestination).branchExecuteTaken = true;
                     break;
                 default:
                     System.out.println("opcode " + validEntry.opcode + " not recognised");
@@ -98,7 +108,7 @@ public class BranchUnit implements Module{
     public boolean setNextInstruction(Instruction instruction) {
 
         if (RS.size() < RSsize) {
-            int ROBindex = p.addROB(new ROBEntry(0, 30, 0, false));
+            int ROBindex = p.addROB(new ROBEntry(0, 30, 0, false, instruction.branchTaken, instruction.PC));
 
             // Add RS entry
             // Where to branch

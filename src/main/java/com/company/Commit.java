@@ -17,10 +17,16 @@ public class Commit implements Module{
             if (p.ROB.get(p.ROBcommit).ready) {
                 ROBEntry entry = p.ROB.get(p.ROBcommit);
                 if (entry.type == 0) {
+//                    System.out.println("commit branch");
                     p.noBranches++;
-                    if (entry.misPredict) {
+                    p.BP.updateBTB(entry.instructionPC, entry.value + 1, entry.branchExecuteTaken);
+                    if (entry.branchExecuteTaken != entry.branchFetchTaken) {
                         p.noMispredicts++;
-                        p.ARF.set(30, entry.value);
+                        if (entry.branchFetchTaken) {
+                            p.ARF.set(30, entry.instructionPC);
+                        } else {
+                            p.ARF.set(30, entry.value);
+                        }
                         p.clearPipelineAndReset();
                     }
                 }

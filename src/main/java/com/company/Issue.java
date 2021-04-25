@@ -18,7 +18,7 @@ public class Issue implements Module{
 
     @Override
     public void tick() {
-        System.out.println("ISSUE" + blocked());
+//        System.out.println("ISSUE" + blocked());
 //        if (!blocked()) {
 //            nextModule.intUnit.setNextInstruction(new Instruction("NOP", 0, 0,0));
 //            nextModule.multDivUnit.setNextInstruction(new Instruction("NOP", 0, 0,0));
@@ -32,7 +32,7 @@ public class Issue implements Module{
                     if (Arrays.asList("MOV", "MOVi", "MOVPC", "ADDi", "ADD", "SUBi", "SUB", "CMP", "NOP", "HALT").contains(nextInstruction.opcode)) {
 //                        System.out.println("intUnit");
                         blocked = !nextModule.intUnit.setNextInstruction(nextInstruction);
-                        System.out.println("ISSUE" + blocked);
+//                        System.out.println("ISSUE" + blocked);
                     } else if (Arrays.asList("MUL", "DIV").contains(nextInstruction.opcode)) {
 //                        System.out.println("multDivUnit");
                         blocked = !nextModule.multDivUnit.setNextInstruction(nextInstruction);

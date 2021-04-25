@@ -15,7 +15,7 @@ public class Decode implements Module{
 
     @Override
     public void tick() {
-        System.out.println("DECODE" + blocked());
+//        System.out.println("DECODE" + blocked());
         if (!blocked()) {
             nextModule.setNextInstruction(nextInstruction);
         }

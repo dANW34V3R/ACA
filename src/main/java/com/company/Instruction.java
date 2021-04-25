@@ -8,6 +8,7 @@ public class Instruction {
     public int operand3;
     public boolean valid = true;
     public int PC;
+    public boolean branchTaken = false;
 
     public Instruction(String opcodeVal, int operand1Val, int operand2Val, int operand3Val){
         opcode = opcodeVal;
@@ -31,12 +32,13 @@ public class Instruction {
         operand3 = ins.operand3;
     }
 
-    public Instruction(Instruction ins, int PCVal) {
+    public Instruction(Instruction ins, int PCVal, boolean branchTakenVal) {
         opcode = ins.opcode;
         operand1 = ins.operand1;
         operand2 = ins.operand2;
         operand3 = ins.operand3;
         PC = PCVal;
+        branchTaken = branchTakenVal;
     }
 
     @Override
