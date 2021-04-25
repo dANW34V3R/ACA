@@ -43,6 +43,8 @@ public class Processor {
     private int tick = 0;
     private int cycles = 0;
     public int noInstructions = 0;
+    public int noBranches = 0;
+    public int noMispredicts = 0;
 
     private boolean stepMode = false;
 
@@ -132,6 +134,8 @@ public class Processor {
         System.out.println("No. cycles: " + cycles);
         System.out.println("No. instructions: " + noInstructions);
         System.out.println("Instructions/Cycle: " + (float) noInstructions/(float) cycles);
+        System.out.println("Branches: " + noBranches + ", Mispredicts: " + noMispredicts);
+        System.out.println("Mispredict rate: " + (float) noMispredicts/(float) noBranches);
 
     }
 

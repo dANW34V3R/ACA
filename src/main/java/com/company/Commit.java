@@ -17,7 +17,9 @@ public class Commit implements Module{
             if (p.ROB.get(p.ROBcommit).ready) {
                 ROBEntry entry = p.ROB.get(p.ROBcommit);
                 if (entry.type == 0) {
+                    p.noBranches++;
                     if (entry.misPredict) {
+                        p.noMispredicts++;
                         p.ARF.set(30, entry.value);
                         p.clearPipelineAndReset();
                     }
