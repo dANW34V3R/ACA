@@ -49,7 +49,6 @@ public class MultDivUnit implements Module{
         if (validEntry != null) {
             // WB, ROB entry , value, unused
             Instruction WBins = new Instruction("WB", validEntry.ROBdestination, 0, 0);
-            p.noInstructions += 1;
             switch (validEntry.opcode) {
                 case "MUL":
                     WBins.operand2 = validEntry.val1 * validEntry.val2;

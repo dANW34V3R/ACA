@@ -42,8 +42,6 @@ public class BranchUnit implements Module{
 
             RS.remove(validEntry);
 
-            p.noInstructions += 1;
-
             // WB, ROB entry , value, unused
             Instruction WBins = new Instruction("WB", validEntry.ROBdestination, 0, 0, p.ROB.get(validEntry.ROBdestination).instructionPC);
 

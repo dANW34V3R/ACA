@@ -18,6 +18,7 @@ public class Commit implements Module{
         for (int i = 0; i < width; i++) {
             if (!p.ROBEmpty()) {
                 if (p.ROB.get(p.ROBcommit).ready) {
+                    p.noInstructions += 1;
                     ROBEntry entry = p.ROB.get(p.ROBcommit);
                     if (entry.type == 0) {
 //                    System.out.println("commit branch");

@@ -95,7 +95,6 @@ public class LoadStoreUnit implements Module{
             LSQEntry head = LSQ.get(0);
             if (head.LSBool && head.complete) {
                 // if the head instruction is a load and complete then WB
-                p.noInstructions += 1;
                 LSQ.remove(0);
                 // WB, ROB entry , value, unused
                 Instruction WBins = new Instruction("WB", head.ROBdestination, head.value, 0);
