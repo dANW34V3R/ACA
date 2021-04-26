@@ -4,6 +4,7 @@ public class Fetch implements Module{
 
     Processor p;
     Module nextModule;
+    int width = 4;
 
     public Fetch(Processor proc, Module next) {
         p = proc;
@@ -13,14 +14,16 @@ public class Fetch implements Module{
     @Override
     public void tick() {
         if (!blocked()) {
-            // Increase PC by 1
-            p.ARF.set(30, p.BP.nextPC(p.ARF.get(30)));
-            if (p.INSMEM.size() - 1 < p.ARF.get(30)) {
-                // NOP to prevent out of bounds error at end of program due to pipelining
-                nextModule.setNextInstruction(new Instruction("NOP", 0, 0, 0));
-            } else {
-                // Create new instructions object to prevent values sticking e.g. valid
-                nextModule.setNextInstruction(new Instruction(p.INSMEM.get(p.ARF.get(30)), p.ARF.get(30), p.BP.taken(p.ARF.get(30))));
+            for (int i = 0; i < width; i++) {
+                // Increase PC by 1
+                p.ARF.set(30, p.BP.nextPC(p.ARF.get(30)));
+                if (p.INSMEM.size() - 1 < p.ARF.get(30)) {
+                    // NOP to prevent out of bounds error at end of program due to pipelining
+                    nextModule.setNextInstruction(new Instruction("NOP", 0, 0, 0, false));
+                } else {
+                    // Create new instructions object to prevent values sticking e.g. valid
+                    nextModule.setNextInstruction(new Instruction(p.INSMEM.get(p.ARF.get(30)), p.ARF.get(30), p.BP.taken(p.ARF.get(30))));
+                }
             }
         }
     }

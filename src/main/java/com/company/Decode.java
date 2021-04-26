@@ -1,23 +1,36 @@
 package com.company;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 public class Decode implements Module{
 
     Processor p;
     Module nextModule;
-    public Instruction nextInstruction = new Instruction("NOP", 0, 0, 0);
+    public List<Instruction> nextInstructionList = new ArrayList<>();
+    int width = 4;
 
     public Decode(Processor proc, Module next) {
         p = proc;
         nextModule = next;
-        nextInstruction.valid = false;
+        for (Instruction nIns : nextInstructionList) {
+            nIns.valid = false;
+        }
     }
 
 
     @Override
     public void tick() {
 //        System.out.println("DECODE" + blocked());
+        // TODO limit to width, remove element on tick
         if (!blocked()) {
-            nextModule.setNextInstruction(nextInstruction);
+            List<Instruction> movedOn = new ArrayList<>();
+            for (Instruction nIns : nextInstructionList) {
+                nextModule.setNextInstruction(nIns);
+                movedOn.add(nIns);
+            }
+            nextInstructionList.removeAll(movedOn);
         }
     }
 
@@ -28,12 +41,14 @@ public class Decode implements Module{
 
     @Override
     public boolean setNextInstruction(Instruction instruction) {
-        nextInstruction = instruction;
+        nextInstructionList.add(instruction);
         return true;
     }
 
     @Override
     public void invalidateCurrentInstruction() {
-        nextInstruction.valid = false;
+        for (Instruction nIns : nextInstructionList) {
+            nIns.valid = false;
+        }
     }
 }

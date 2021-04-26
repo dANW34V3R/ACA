@@ -16,6 +16,13 @@ public class Instruction {
         operand2 = operand2Val;
         operand3 = operand3Val;
     }
+    public Instruction(String opcodeVal, int operand1Val, int operand2Val, int operand3Val, boolean validVal){
+        opcode = opcodeVal;
+        operand1 = operand1Val;
+        operand2 = operand2Val;
+        operand3 = operand3Val;
+        valid = validVal;
+    }
 
     public Instruction(String opcodeVal, int operand1Val, int operand2Val, int operand3Val, int PCVal){
         opcode = opcodeVal;

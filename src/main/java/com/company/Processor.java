@@ -102,12 +102,13 @@ public class Processor {
             // WB ticks last to allow instructions to be issued before values are broadcast
             insWB.tick();
             cycles += 1;
-            System.out.println("FE:" + insD.nextInstruction.toString() + insF.blocked());
-            System.out.println("DE:" + insI.nextInstruction.toString() + insD.blocked());
-            System.out.println("ISint:" + insE.intUnit.RS.toString() + insI.blocked());
-            System.out.println("ISmult:" + insE.multDivUnit.RS.toString() + insI.blocked());
-            System.out.println("ISbranch:" + insE.branchUnit.RS.toString() + insI.blocked());
-            System.out.println("LSQ:" + insE.loadStoreUnit.LSQ.toString() + insI.blocked());
+            System.out.println("FE:" + insD.nextInstructionList.toString() + insF.blocked());
+            System.out.println("DE:" + insI.nextInstructionList.toString() + insD.blocked());
+            System.out.println("ISBlocked:" + insI.nextInstructionList.size() + insI.blocked + insI.blocked());
+            System.out.println("ISint:" + insE.intUnit.RS.toString() + (insE.intUnit.RS.size() >= insE.intUnit.RSsize));
+            System.out.println("ISmult:" + insE.multDivUnit.RS.toString() + (insE.multDivUnit.RS.size() >= insE.multDivUnit.RSsize));
+            System.out.println("ISbranch:" + insE.branchUnit.RS.toString() + (insE.branchUnit.RS.size() >= insE.branchUnit.RSsize));
+            System.out.println("LSQ:" + insE.loadStoreUnit.LSQ.toString() + (insE.loadStoreUnit.LSQ.size() >= insE.loadStoreUnit.LSQsize));
             insE.multDivUnit.printState();
             System.out.println("WBqueue:" + insWB.WBqueue.toString());
             System.out.println("MEMqueue:" + insMEM.queue.toString());
