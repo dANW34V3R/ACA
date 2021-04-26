@@ -24,19 +24,21 @@ public class Decode implements Module{
     public void tick() {
 //        System.out.println("DECODE" + blocked());
         // TODO limit to width, remove element on tick
-        if (!blocked()) {
+//        if (!blocked()) {
             List<Instruction> movedOn = new ArrayList<>();
             for (Instruction nIns : nextInstructionList) {
-                nextModule.setNextInstruction(nIns);
-                movedOn.add(nIns);
+                if (!nextModule.blocked()) {
+                    nextModule.setNextInstruction(nIns);
+                    movedOn.add(nIns);
+                }
             }
             nextInstructionList.removeAll(movedOn);
-        }
+//        }
     }
 
     @Override
     public boolean blocked() {
-        return nextModule.blocked();
+        return nextInstructionList.size() >= width;
     }
 
     @Override
