@@ -21,55 +21,57 @@ public class IntegerUnit implements Module{
     @Override
     public void tick() {
 
-        Optional<RSEntry> entry = RS.stream().filter(rsEntry -> rsEntry.val1 != null && rsEntry.val2 != null).findFirst();
+        for (int i = 0; i < 2; i++) {
+            Optional<RSEntry> entry = RS.stream().filter(rsEntry -> rsEntry.val1 != null && rsEntry.val2 != null).findFirst();
 
-        if (entry.isPresent()) {
-            RSEntry validEntry = entry.get();
+            if (entry.isPresent()) {
+                RSEntry validEntry = entry.get();
 
-            RS.remove(validEntry);
+                RS.remove(validEntry);
 
-            // WB, ROB entry , value, unused
-            Instruction WBins = new Instruction("WB", validEntry.ROBdestination, 0, 0);
-            p.noInstructions += 1;
-            switch (validEntry.opcode) {
-                case "MOVi":
-                case "MOVPC":
-                    WBins.operand2 = validEntry.val2;
-                    break;
-                case "MOV":
-                    WBins.operand2 = validEntry.val1;
-                    break;
-                case "ADDi":
-                case "ADD":
-                    WBins.operand2 = validEntry.val1 + validEntry.val2;
-                    break;
-                case "SUBi":
-                case "SUB":
-                    WBins.operand2 = validEntry.val1 - validEntry.val2;
-                    break;
-                case "CMP":
-                    //op1 - op2 , update flags
-                    int result = validEntry.val1 - validEntry.val2;
-                    if (result == 0) {
+                // WB, ROB entry , value, unused
+                Instruction WBins = new Instruction("WB", validEntry.ROBdestination, 0, 0);
+                p.noInstructions += 1;
+                switch (validEntry.opcode) {
+                    case "MOVi":
+                    case "MOVPC":
+                        WBins.operand2 = validEntry.val2;
+                        break;
+                    case "MOV":
+                        WBins.operand2 = validEntry.val1;
+                        break;
+                    case "ADDi":
+                    case "ADD":
+                        WBins.operand2 = validEntry.val1 + validEntry.val2;
+                        break;
+                    case "SUBi":
+                    case "SUB":
+                        WBins.operand2 = validEntry.val1 - validEntry.val2;
+                        break;
+                    case "CMP":
+                        //op1 - op2 , update flags
+                        int result = validEntry.val1 - validEntry.val2;
+                        if (result == 0) {
 //                        p.f = 0;
-                        WBins.operand2 = 0;
-                    } else if (result < 0) {
+                            WBins.operand2 = 0;
+                        } else if (result < 0) {
 //                        p.f = -1;
-                        WBins.operand2 = -1;
-                    } else {
+                            WBins.operand2 = -1;
+                        } else {
 //                        p.f = 1;
-                        WBins.operand2 = 1;
-                    }
-                    break;
-                case "NOP":
-                    p.noInstructions -= 1;
-                    break;
-                case "HALT":
-                    break;
-                default:
-                    throw new java.lang.Error("opcode " + validEntry.opcode + " not recognised by IntegerUnit");
+                            WBins.operand2 = 1;
+                        }
+                        break;
+                    case "NOP":
+                        p.noInstructions -= 1;
+                        break;
+                    case "HALT":
+                        break;
+                    default:
+                        throw new java.lang.Error("opcode " + validEntry.opcode + " not recognised by IntegerUnit");
+                }
+                nextModule.setNextInstruction(WBins);
             }
-            nextModule.setNextInstruction(WBins);
         }
     }
 
