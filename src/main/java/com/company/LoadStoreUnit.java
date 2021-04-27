@@ -55,7 +55,7 @@ public class LoadStoreUnit implements Module{
                         break;
                     }
 
-                    if (!loadEntry.LSBool && loadEntry.address == validEntry.address) {
+                    if (loadEntry.LSBool && loadEntry.address == validEntry.address) {
                         // if entry is a load with the same address, forward value and keep going down LSQ
                         LSQ.get(LSQ.indexOf(loadEntry)).value = validEntry.value;
                         LSQ.get(LSQ.indexOf(loadEntry)).complete = true;
@@ -236,7 +236,6 @@ public class LoadStoreUnit implements Module{
 
     public void sendStoreToMem(int ROBindex) {
         LSQEntry storeEntry = LSQ.get(0);
-        p.noInstructions += 1;
 
         if (storeEntry.ROBdestination != ROBindex) {
             throw new java.lang.Error("Store ROB index does not align");

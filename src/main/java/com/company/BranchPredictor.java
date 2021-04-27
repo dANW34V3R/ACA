@@ -22,7 +22,7 @@ public class BranchPredictor{
         }
         Optional<BTBEntry> entry = BTB.stream().filter(e -> e.PC == currentPC).findFirst();
         if (entry.isPresent()) {
-            System.out.println("entry present");
+//            System.out.println("entry present");
             return entry.get().getNextPC();
         } else {
             return currentPC + 1;
@@ -35,7 +35,7 @@ public class BranchPredictor{
             // update
             entry.get().updateEntry(taken);
         } else {
-            System.out.println("create BTB entry: " + currentPC);
+//            System.out.println("create BTB entry: " + currentPC);
             // create
             int val = taken ? 2 : 1;
             BTB.add(new BTBEntry(currentPC, branchToPC, val));

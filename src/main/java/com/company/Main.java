@@ -1,7 +1,14 @@
 package com.company;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferByte;
+import java.awt.image.DataBufferInt;
+import java.awt.image.WritableRaster;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.net.URL;
 import java.util.*;
 
 public class Main {
@@ -176,9 +183,73 @@ public class Main {
         List<Instruction> instructions = createInstructionsFromFile("programs/" + args[0] + "/program.txt");
         List<Integer> memory = readMemoryFile("programs/" + args[0] + "/memory.txt");
 
-        //execute file
+        BufferedImage image = new BufferedImage(1,1,BufferedImage.TYPE_BYTE_GRAY);
+        byte[] srcPixels = new byte[1];
+
+        if (args.length > 1) {
+            try {
+                image = ImageIO.read(new File(args[1].toString()));
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw new RuntimeException(e);
+            }
+
+            if (image.getType() != BufferedImage.TYPE_BYTE_GRAY) {
+                BufferedImage tmp = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_BYTE_GRAY);
+                tmp.getGraphics().drawImage(image, 0, 0, null);
+                image = tmp;
+            }
+
+            srcPixels = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
+
+            // If image file is given, contents of memory file is ignored
+            memory.clear();
+
+            for (int i = 0; i < srcPixels.length; i++) {
+                //Remove byte sign when converting to int
+                memory.add(srcPixels[i] & 0xFF);
+            }
+        }
+
+        //execute program
         Processor p = new Processor(instructions, memory);
 
+        if (args.length > 2) {
+
+            int[] outPixelsInt = new int[srcPixels.length];
+            for (int i = 0; i < srcPixels.length; i++) {
+                // New image will be placed directly next to loaded image in memory
+                outPixelsInt[i] = Math.max(0, Math.min(255, Math.abs(p.MEM.get(srcPixels.length + i))));
+                System.out.print(outPixelsInt[i] + ",");
+                if ((i + 1) % 45 == 0) {
+                    System.out.println();
+                }
+            }
+
+            BufferedImage endImage = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_BYTE_GRAY);
+            WritableRaster raster = (WritableRaster) endImage.getData();
+            raster.setPixels(0,0,endImage.getWidth(), endImage.getHeight(), outPixelsInt);
+            endImage.setData(raster);
+
+//            BufferedImage newImage = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_BYTE_GRAY);
+//            byte [] newData = ((DataBufferByte) newImage.getRaster().getDataBuffer()).getData();
+//
+//            for (int i = 0; i < srcPixels.length; i++) {
+//                // New image will be placed directly next to loaded image in memory
+//                newData[i] = p.MEM.get(srcPixels.length + i).byteValue(); //Math.max(0, Math.min(256, p.MEM.get(srcPixels.length + i)));
+////                System.out.print(outPixelsInt[i] + ",");
+////                if ((i + 1) % 45 == 0) {
+////                    System.out.println();
+////                }
+//            }
+
+            File file = new File(args[2].toString());
+            try {
+                ImageIO.write(endImage, "bmp", file);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
 }

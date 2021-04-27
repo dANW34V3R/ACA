@@ -10,7 +10,7 @@ import java.util.*;
 public class Processor {
 
     public List<Instruction> INSMEM;
-    public List<Integer> MEM = new ArrayList<>(Collections.nCopies(1024, 0));
+    public List<Integer> MEM = new ArrayList<>(Collections.nCopies(4096, 0));
 
     public List<Integer> ARF = new ArrayList<>(Collections.nCopies(32, -1));
     public List<Integer> RAT = new ArrayList<>(Collections.nCopies(32, null));
@@ -47,7 +47,7 @@ public class Processor {
     public int noBranches = 0;
     public int noMispredicts = 0;
 
-    private boolean stepMode = false;
+    private boolean stepMode = true;
 
     public Processor(List<Instruction> instructions, List<Integer> memory) {
 //        ARF.set(1, -23);
@@ -119,8 +119,9 @@ public class Processor {
             System.out.println(ROBcommit + ":" + ROBissue + ":" + ROB.toString());
             System.out.println(MEM.toString());
             System.out.println("__________________________________");
+            System.out.println(noInstructions);
 
-            if (stepMode) {
+            if (stepMode && noInstructions % 1000 == 0) {
                 try {
                     BufferedReader keyboard = new BufferedReader(new InputStreamReader(System.in, "UTF-8"));
                     byte dataBytes[] = keyboard.readLine().getBytes(Charset.forName("UTF-8"));

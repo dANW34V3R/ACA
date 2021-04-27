@@ -62,7 +62,6 @@ public class IntegerUnit implements Module{
                         }
                         break;
                     case "NOP":
-                        p.noInstructions -= 1;
                         break;
                     case "HALT":
                         break;

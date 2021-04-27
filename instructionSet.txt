@@ -20,7 +20,7 @@ CMP Rd Rs		- -1 if Rd < Rs, 0 if Rd = Rs, +1 if Rd > Rs
 //AND Rd Rs		- Rd <- Rd . Rs bitwise
 //
 //OR Rd Rs		- Rd <- Rd + Rs bitwise
-//
+/
 //NOT Rd			- Rd <- NOT Rd bitwise
 
 BEQ label		- if CMP = 0 goto label
