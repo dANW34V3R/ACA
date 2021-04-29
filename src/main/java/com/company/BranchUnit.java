@@ -43,10 +43,10 @@ public class BranchUnit implements Module{
 
         if (validEntriesList.size() > 0) {
             // RS policies
-//            RSEntry entry = validEntriesList.get(rand.nextInt(validEntriesList.size())); //random
-//            RSEntry entry = validEntriesList.get(validEntriesList.size() - 1); //newest
+//            RSEntry validEntry = validEntriesList.get(rand.nextInt(validEntriesList.size())); //random
+//            RSEntry validEntry = validEntriesList.get(validEntriesList.size() - 1); //newest
             RSEntry validEntry = validEntriesList.get(0); //oldest
-//            RSEntry entry = validEntriesList.get(exUnit.getMostDependedOn(validEntriesList)); //max dependence
+//            RSEntry validEntry = validEntriesList.get(exUnit.getMostDependedOn(validEntriesList)); //max dependence
 
             RS.remove(validEntry);
 

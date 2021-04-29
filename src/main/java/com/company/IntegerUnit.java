@@ -9,7 +9,7 @@ public class IntegerUnit implements Module{
     Module nextModule;
     Execute exUnit;
 
-    int noUnits = 4;
+    int noUnits = 2;
 
     int RSsize = 4;
     List<RSEntry> RS = new ArrayList<>();
@@ -33,10 +33,10 @@ public class IntegerUnit implements Module{
 
             if (validEntriesList.size() > 0) {
                 // RS policies
-//                RSEntry entry = validEntriesList.get(rand.nextInt(validEntriesList.size())); //random
-//                RSEntry entry = validEntriesList.get(validEntriesList.size() - 1); //newest
+//                RSEntry validEntry = validEntriesList.get(rand.nextInt(validEntriesList.size())); //random
+//                RSEntry validEntry = validEntriesList.get(validEntriesList.size() - 1); //newest
                 RSEntry validEntry = validEntriesList.get(0); //oldest
-//                RSEntry entry = validEntriesList.get(exUnit.getMostDependedOn(validEntriesList)); //max dependence
+//                RSEntry validEntry = validEntriesList.get(exUnit.getMostDependedOn(validEntriesList)); //max dependence
 
                 RS.remove(validEntry);
 

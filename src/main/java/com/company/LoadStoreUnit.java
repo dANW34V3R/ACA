@@ -11,7 +11,7 @@ public class LoadStoreUnit implements Module{
     Broadcast WBModule;
     Memory memModule;
 
-    int noUnits = 4;
+    int noUnits = 2;
 
     // Load Store Queue
     int LSQsize = 20;

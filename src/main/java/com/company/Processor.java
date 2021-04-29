@@ -18,7 +18,7 @@ public class Processor {
     public List<Integer> RAT = new ArrayList<>(Collections.nCopies(32, null));
 
     // Reorder Buffer
-    public int ROBSize = 64;
+    public int ROBSize = 1024;
     public int ROBissue = 0;
     public int ROBcommit = 0;
     public List<ROBEntry> ROB = new ArrayList<>(Collections.nCopies(ROBSize, null));
@@ -105,7 +105,7 @@ public class Processor {
 ////            System.out.println(noInstructions);
 
             // Step mode
-            if (stepMode && cycles % 100 == 0 && cycles > 20000) {
+            if (stepMode && cycles % 100 == 0 && cycles > 0) {
                 try {
                     BufferedReader keyboard = new BufferedReader(new InputStreamReader(System.in, "UTF-8"));
                     byte dataBytes[] = keyboard.readLine().getBytes(Charset.forName("UTF-8"));
