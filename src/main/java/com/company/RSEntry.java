@@ -1,7 +1,5 @@
 package com.company;
 
-import com.sun.istack.internal.Nullable;
-
 public class RSEntry {
 
     String opcode;
@@ -11,7 +9,7 @@ public class RSEntry {
     Integer val1;
     Integer val2;
 
-    public RSEntry(String op, int destTag, @Nullable Integer tag1Val, @Nullable Integer tag2Val, @Nullable Integer val1Val, @Nullable Integer val2Val) {
+    public RSEntry(String op, int destTag, Integer tag1Val, Integer tag2Val, Integer val1Val, Integer val2Val) {
         opcode = op;
         ROBdestination = destTag;
         tag1 = tag1Val;
