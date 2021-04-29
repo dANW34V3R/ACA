@@ -13,9 +13,11 @@ import java.util.*;
 
 public class Main {
 
+    // Returns list of instruction objects when given path to program file
     private static List<Instruction> createInstructionsFromFile(String path){
-        try {
 
+        // Read the program file
+        try {
             List<String> rawInstructions = new ArrayList<>();
 
             File myObj = new File(path);
@@ -23,7 +25,6 @@ public class Main {
             while (myReader.hasNextLine()) {
                 String data = myReader.nextLine();
                 rawInstructions.add(data);
-//                System.out.println(data);
             }
             myReader.close();
             return stringListToInstructionList(rawInstructions);
@@ -35,10 +36,12 @@ public class Main {
         return Collections.emptyList();
     }
 
+    // Returns list of instruction objects given a list of instruction strings
     private static List<Instruction> stringListToInstructionList(List<String> rawInstructions) {
 
-        //Intermediate list storing raw instructions without labels and dictionary from labels to corresponding addresses
+        // Intermediate list storing raw instructions without labels
         List<String> instructionStringsWithoutLabels = new ArrayList<>();
+        // Dictionary from labels to corresponding program addresses
         HashMap<String, Integer> labelToAddr = new HashMap<>();
 
         //List of compiled instructions
@@ -59,10 +62,11 @@ public class Main {
             }
         }
 
-        //Convert instruction strings to objects
-        for (int i = 0; i <instructionStringsWithoutLabels.size(); i++) {
+        // Convert instruction strings to objects
+        for (int i = 0; i < instructionStringsWithoutLabels.size(); i++) {
             String[] insStringSplit = instructionStringsWithoutLabels.get(i).split(" ");
 
+            // Check that PC is not directly accessed
             // Won't catch all errors e.g. [R30 in LDR and STR
             for (int k = 1; k < insStringSplit.length; k++) {
                 if (insStringSplit[k].compareTo("R30") == 0) {
@@ -70,7 +74,6 @@ public class Main {
                 }
             }
 
-//            System.out.println(instructionStringsWithoutLabels.get(i));
             if (insStringSplit[0].compareTo("BR") == 0) {
                 instructions.add(new Instruction(insStringSplit[0], Integer.parseInt(insStringSplit[1].substring(1)), 0, 0));
             } else if (insStringSplit[0].compareTo("MOVPC") == 0) {
@@ -91,17 +94,14 @@ public class Main {
                     operand1 = Integer.parseInt(insStringSplit[1].substring(1));
                     operand2 = Integer.parseInt(insStringSplit[2].substring(2));
                     operand3 = Integer.parseInt(insStringSplit[3].substring(1, insStringSplit[3].length() - 1));
-//                    System.out.println(insStringSplit[0] + "i:" + operand1 + ":" + operand2 + ":" + operand3);
                     instructions.add(new Instruction(insStringSplit[0] + "i", operand1, operand2, operand3));
                 } else {
                     //register index
                     operand1 = Integer.parseInt(insStringSplit[1].substring(1));
                     operand2 = Integer.parseInt(insStringSplit[2].substring(2));
                     operand3 = Integer.parseInt(insStringSplit[3].substring(1, insStringSplit[3].length() - 1));
-//                    System.out.println(insStringSplit[0] + ":" + operand1 + ":" + operand2 + ":" + operand3);
                     instructions.add(new Instruction(insStringSplit[0] , operand1, operand2, operand3));
                 }
-
 
             } else if (insStringSplit[0].compareTo("ADD") == 0 || insStringSplit[0].compareTo("SUB") == 0 || insStringSplit[0].compareTo("MOV") == 0) {
                 // Instructions allowing immediates
@@ -109,7 +109,6 @@ public class Main {
                     //immediate
                     operand1 = Integer.parseInt(insStringSplit[1].substring(1));
                     operand2 = Integer.parseInt(insStringSplit[2].substring(1));
-//                    System.out.println(insStringSplit[0] + "i:" + operand1 + ":" + operand2);
                     instructions.add(new Instruction(insStringSplit[0] + "i", operand1, operand2, 0));
                 } else {
                     //register index
@@ -118,7 +117,6 @@ public class Main {
                     if (insStringSplit.length > 3) {
                         operand3 = Integer.parseInt(insStringSplit[3].substring(1));
                     }
-//                    System.out.println(insStringSplit[0] + ":" + operand1 + ":" + operand2 + ":" + operand3);
                     instructions.add(new Instruction(insStringSplit[0], operand1, operand2, operand3));
                 }
 
@@ -152,7 +150,10 @@ public class Main {
         return instructions;
     }
 
+    // Returns list of integer given path to memory file
     private static List<Integer> readMemoryFile(String path) {
+
+        // Attempt to read the file
         try {
 
             List<Integer> memoryVals = new ArrayList<>();
@@ -162,7 +163,6 @@ public class Main {
             while (myReader.hasNextLine()) {
                 String data = myReader.nextLine();
                 memoryVals.add(Integer.parseInt(data));
-//                System.out.println(data);
             }
             myReader.close();
             return memoryVals;
@@ -174,19 +174,19 @@ public class Main {
         return Collections.emptyList();
     }
 
-
-
     public static void main(String[] args) {
 
-        //read file
-        //compile file
+        // Read and compile instructions and memory contents
         List<Instruction> instructions = createInstructionsFromFile("programs/" + args[0] + "/program.txt");
         List<Integer> memory = readMemoryFile("programs/" + args[0] + "/memory.txt");
 
+        // For image manipulation programs, populate memory with image values
         BufferedImage image = new BufferedImage(1,1,BufferedImage.TYPE_BYTE_GRAY);
         byte[] srcPixels = new byte[1];
 
+        // Second argument treated as path to image source
         if (args.length > 1) {
+            // Attempt to read the file
             try {
                 image = ImageIO.read(new File(args[1].toString()));
             } catch (Exception e) {
@@ -194,55 +194,50 @@ public class Main {
                 throw new RuntimeException(e);
             }
 
+            // Convert image to grayscale
             if (image.getType() != BufferedImage.TYPE_BYTE_GRAY) {
                 BufferedImage tmp = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_BYTE_GRAY);
                 tmp.getGraphics().drawImage(image, 0, 0, null);
                 image = tmp;
             }
 
+            // Get pixel data
             srcPixels = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
 
             // If image file is given, contents of memory file is ignored
             memory.clear();
 
+            // Populate memory with int values
             for (int i = 0; i < srcPixels.length; i++) {
                 //Remove byte sign when converting to int
                 memory.add(srcPixels[i] & 0xFF);
             }
         }
 
-        //execute program
+        // Execute program
         Processor p = new Processor(instructions, memory);
 
+        // Write output image to path given by third argument
         if (args.length > 2) {
 
             int[] outPixelsInt = new int[srcPixels.length];
             for (int i = 0; i < srcPixels.length; i++) {
                 // New image will be placed directly next to loaded image in memory
+                // Ensure pixel values are between 0 and 255
                 outPixelsInt[i] = Math.max(0, Math.min(255, Math.abs(p.MEM.get(srcPixels.length + i))));
-                System.out.print(outPixelsInt[i] + ",");
-                if ((i + 1) % 45 == 0) {
-                    System.out.println();
-                }
+//                System.out.print(outPixelsInt[i] + ",");
+//                if ((i + 1) % 45 == 0) {
+//                    System.out.println();
+//                }
             }
 
+            // Write int array to BufferedImage object
             BufferedImage endImage = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_BYTE_GRAY);
             WritableRaster raster = (WritableRaster) endImage.getData();
             raster.setPixels(0,0,endImage.getWidth(), endImage.getHeight(), outPixelsInt);
             endImage.setData(raster);
 
-//            BufferedImage newImage = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_BYTE_GRAY);
-//            byte [] newData = ((DataBufferByte) newImage.getRaster().getDataBuffer()).getData();
-//
-//            for (int i = 0; i < srcPixels.length; i++) {
-//                // New image will be placed directly next to loaded image in memory
-//                newData[i] = p.MEM.get(srcPixels.length + i).byteValue(); //Math.max(0, Math.min(256, p.MEM.get(srcPixels.length + i)));
-////                System.out.print(outPixelsInt[i] + ",");
-////                if ((i + 1) % 45 == 0) {
-////                    System.out.println();
-////                }
-//            }
-
+            // Write the file to .bmp
             File file = new File(args[2].toString());
             try {
                 ImageIO.write(endImage, "bmp", file);

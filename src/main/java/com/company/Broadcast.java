@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class WriteBack implements Module{
+public class Broadcast implements Module{
 
     Processor p;
     public Optional<Instruction> nextInstruction = Optional.empty();
@@ -16,11 +16,11 @@ public class WriteBack implements Module{
 
     private int width = 4;
 
+    // TODO limit this size
     public List<Instruction> WBqueue = new ArrayList<>();
 
-    public WriteBack(Processor proc) {
+    public Broadcast(Processor proc) {
         p = proc;
-//        nextModule = next;
     }
 
     @Override
@@ -28,13 +28,14 @@ public class WriteBack implements Module{
         for (int i = 0; i < width; i++) {
             if (nextInstruction.isPresent()) {
                 Instruction nextInstructionValue = nextInstruction.get();
-//            System.out.println("WB -> " + nextInstructionValue.toString());
-                p.ROB.get(nextInstructionValue.operand1).value = nextInstructionValue.operand2; // TODO can be null
+
+                // Update ROB
+                p.ROB.get(nextInstructionValue.operand1).value = nextInstructionValue.operand2;
                 p.ROB.get(nextInstructionValue.operand1).ready = true;
 
                 // If register update or CMP
-                if (p.ROB.get(nextInstructionValue.operand1).type == 2 || p.ROB.get(nextInstructionValue.operand1).type == 3 || p.ROB.get(nextInstructionValue.operand1).type == 1) {
-                    // Broadcast value
+                if ( p.ROB.get(nextInstructionValue.operand1).type == 1 || p.ROB.get(nextInstructionValue.operand1).type == 2 || p.ROB.get(nextInstructionValue.operand1).type == 3) {
+                    // Broadcast value to all execution units
                     intUnit.updateRS(nextInstructionValue.operand1, nextInstructionValue.operand2);
                     multDivUnit.updateRS(nextInstructionValue.operand1, nextInstructionValue.operand2);
                     branchUnit.updateRS(nextInstructionValue.operand1, nextInstructionValue.operand2);
@@ -42,7 +43,6 @@ public class WriteBack implements Module{
                 }
                 WBqueue.remove(0);
             }
-//        System.out.println(WBqueue.toString());
             nextInstruction = WBqueue.stream().findFirst();
         }
     }
@@ -54,7 +54,6 @@ public class WriteBack implements Module{
 
     @Override
     public boolean setNextInstruction(Instruction instruction) {
-//        System.out.println("WB SET NEXT" + instruction.toString());
         WBqueue.add(instruction);
         return true;
     }

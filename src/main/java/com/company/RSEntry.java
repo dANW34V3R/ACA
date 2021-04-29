@@ -31,4 +31,17 @@ public class RSEntry {
                 ", val2=" + val2 +
                 '}';
     }
+
+    // returns this RS entry with tags set to -1 for most depended on RSEntry evaluation
+    public RSEntry getNonNullEntry() {
+        Integer nonNullTag1 = tag1;
+        Integer nonNullTag2 = tag2;
+        if (tag1 == null) {
+            nonNullTag1 = -1;
+        }
+        if (tag2 == null) {
+            nonNullTag2 = -1;
+        }
+        return new RSEntry(opcode, ROBdestination, nonNullTag1, nonNullTag2, val1, val2);
+    }
 }

@@ -1,4 +1,4 @@
-MOV R0 #5
+MOV R0 #12
 MOV R1 #1
 MOV R3 #0
 MOV R31 #0

@@ -2,6 +2,7 @@ package com.company;
 
 public class BTBEntry {
 
+    //current PC, branch to PC, taken
     int PC;
     int branchToPC;
     // Strongly not taken, not taken, taken, strongly taken
@@ -14,6 +15,7 @@ public class BTBEntry {
         bitPredictor = bitPredictorVal;
     }
 
+    // updates BTB entry depending on whether the branch was taken or not
     public void updateEntry(boolean taken) {
         if (taken) {
             bitPredictor++;
@@ -28,6 +30,7 @@ public class BTBEntry {
         }
     }
 
+    // Returns the predicted next PC value for this entry
     public int getNextPC() {
         if (bitPredictor > 1) {
             return branchToPC;
@@ -38,5 +41,14 @@ public class BTBEntry {
 
     public boolean taken(){
         return bitPredictor > 1;
+    }
+
+    @Override
+    public String toString() {
+        return "BTBEntry{" +
+                "PC=" + PC +
+                ", branchToPC=" + branchToPC +
+                ", bitPredictor=" + bitPredictor +
+                '}';
     }
 }

@@ -7,7 +7,6 @@ public class ROBEntry {
     int value;
     boolean ready;
 
-//    boolean misPredict = false;
     boolean branchFetchTaken = false;
     boolean branchExecuteTaken = false;
     int instructionPC;

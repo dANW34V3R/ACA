@@ -8,9 +8,11 @@ public class LSQEntry {
     // true = load, false = store
     boolean LSBool;
     Integer address;
+    // allows loads and stores to be kept track of within LSQ
     int sequenceNumber;
     Integer value;
     boolean complete = false;
+    boolean waiting = false;
     Integer tag1;
     Integer tag2;
     Integer strValTag = null;
@@ -52,12 +54,33 @@ public class LSQEntry {
                 "ROBdestination=" + ROBdestination +
                 ", LSBool=" + LSBool +
                 ", address=" + address +
+                ", sequenceNumber=" + sequenceNumber +
                 ", value=" + value +
                 ", complete=" + complete +
+                ", waiting=" + waiting +
                 ", tag1=" + tag1 +
                 ", tag2=" + tag2 +
+                ", strValTag=" + strValTag +
                 ", val1=" + val1 +
                 ", val2=" + val2 +
+                ", strValVal=" + strValVal +
                 '}';
+    }
+
+    // returns this LSQ entry with tags set to -1 for most depended on RSEntry evaluation
+    public LSQEntry getNonNullEntry(){
+        Integer nonNullTag1 = tag1;
+        Integer nonNullTag2 = tag2;
+        Integer nonNullValTag = strValTag;
+        if (tag1 == null) {
+            nonNullTag1 = -1;
+        }
+        if (tag2 == null) {
+            nonNullTag2 = -1;
+        }
+        if (strValTag == null) {
+            nonNullValTag = -1;
+        }
+        return new LSQEntry(ROBdestination, LSBool, address, value, nonNullTag1, val1, nonNullTag2, val2, nonNullValTag, strValVal);
     }
 }

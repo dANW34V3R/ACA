@@ -2,66 +2,69 @@ package com.company;
 
 import com.sun.org.apache.xpath.internal.operations.Mod;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class BranchUnit implements Module{
 
     Processor p;
     Module nextModule;
+    Execute exUnit;
 
     List<? extends Module> frontEnd;
 
     int RSsize = 4;
     List<RSEntry> RS = new ArrayList<>();
 
-    public BranchUnit(Processor proc, Module next){
+    // Initialise random
+    Random rand = new Random();
+
+    public BranchUnit(Processor proc, Module next, Execute executionUnit){
         p = proc;
         nextModule = next;
+        exUnit = executionUnit;
     }
 
-    public void setFrontEnd(List<? extends Module> frontEndList) {
-        frontEnd = frontEndList;
-    }
-
-    private void invalidatePipeline() {
-        for (Module module : frontEnd) {
-            module.invalidateCurrentInstruction();
-        }
-    }
+//    public void setFrontEnd(List<? extends Module> frontEndList) {
+//        frontEnd = frontEndList;
+//    }
+//
+//    private void invalidatePipeline() {
+//        for (Module module : frontEnd) {
+//            module.invalidateCurrentInstruction();
+//        }
+//    }
 
     @Override
     public void tick() {
 
-        Optional<RSEntry> entry = RS.stream().filter(rsEntry -> rsEntry.val1 != null && rsEntry.val2 != null).findFirst();
+        // Get list of instructions ready to dispatch
+        List<RSEntry> validEntriesList = RS.stream().filter(rsEntry -> rsEntry.val1 != null && rsEntry.val2 != null).collect(Collectors.toList());
 
-        if (entry.isPresent()) {
-            RSEntry validEntry = entry.get();
+        if (validEntriesList.size() > 0) {
+            // RS policies
+//            RSEntry entry = validEntriesList.get(rand.nextInt(validEntriesList.size())); //random
+//            RSEntry entry = validEntriesList.get(validEntriesList.size() - 1); //newest
+            RSEntry validEntry = validEntriesList.get(0); //oldest
+//            RSEntry entry = validEntriesList.get(exUnit.getMostDependedOn(validEntriesList)); //max dependence
 
             RS.remove(validEntry);
 
+            // Data passed to broadcast
             // WB, ROB entry , value, unused
-            Instruction WBins = new Instruction("WB", validEntry.ROBdestination, 0, 0, p.ROB.get(validEntry.ROBdestination).instructionPC);
+            Instruction WBins = new Instruction("WB", validEntry.ROBdestination, validEntry.val1 - 1, 0, p.ROB.get(validEntry.ROBdestination).instructionPC);
 
+            // Check CMP flag and set ROB branch flag
             switch (validEntry.opcode) {
-                case "NOP":
-                    break;
                 case "BEQ":
                     if (validEntry.val2 == 0) {
-//                        p.ARF.set(30, validEntry.val1 - 1);
-                        WBins.operand2 = validEntry.val1 - 1;
                         p.ROB.get(validEntry.ROBdestination).branchExecuteTaken = true;
-//                        p.ROB.get(validEntry.ROBdestination).misPredict = !p.ROB.get(validEntry.ROBdestination).branchFetchTaken;
                     } else {
                         p.ROB.get(validEntry.ROBdestination).branchExecuteTaken = false;
-//                        p.ROB.get(validEntry.ROBdestination).misPredict = p.ROB.get(validEntry.ROBdestination).branchFetchTaken;
                     }
                     break;
                 case "BNE":
                     if (validEntry.val2 != 0) {
-                        WBins.operand2 = validEntry.val1 - 1;
                         p.ROB.get(validEntry.ROBdestination).branchExecuteTaken = true;
                     } else {
                         p.ROB.get(validEntry.ROBdestination).branchExecuteTaken = false;
@@ -69,7 +72,6 @@ public class BranchUnit implements Module{
                     break;
                 case "BLT":
                     if (validEntry.val2 == -1) {
-                        WBins.operand2 = validEntry.val1 - 1;
                         p.ROB.get(validEntry.ROBdestination).branchExecuteTaken = true;
                     }else {
                         p.ROB.get(validEntry.ROBdestination).branchExecuteTaken = false;
@@ -77,16 +79,14 @@ public class BranchUnit implements Module{
                     break;
                 case "BGT":
                     if (validEntry.val2 == 1) {
-                        WBins.operand2 = validEntry.val1 - 1;
                         p.ROB.get(validEntry.ROBdestination).branchExecuteTaken = true;
                     } else {
                         p.ROB.get(validEntry.ROBdestination).branchExecuteTaken = false;
                     }
                     break;
                 case "BR":
-                    validEntry.val1++;
+                    WBins.operand2++;
                 case "B":
-                    WBins.operand2 = validEntry.val1 - 1;
                     p.ROB.get(validEntry.ROBdestination).branchExecuteTaken = true;
                     break;
                 default:
@@ -102,10 +102,14 @@ public class BranchUnit implements Module{
         return false;
     }
 
+    // Called by issue
+    // Creates ROB entry, RS entry and RAT entry
+    // Returns false if blocked
     @Override
     public boolean setNextInstruction(Instruction instruction) {
 
         if (RS.size() < RSsize) {
+            // create ROB entry
             int ROBindex = p.addROB(new ROBEntry(0, 30, 0, false, instruction.branchTaken, instruction.PC));
 
             // Add RS entry
@@ -113,6 +117,7 @@ public class BranchUnit implements Module{
             Integer RATtag1 = null;
             Integer val1 = instruction.operand1;
 
+            // CMP flag value
             Integer RATtag2 = null;
             Integer val2 = null;
 
@@ -120,6 +125,7 @@ public class BranchUnit implements Module{
                 val2 = -2;
             } else if (instruction.opcode.compareTo("BR") == 0) {
 
+                // Need value from given register
                 val1 = null;
                 // set val1
                 RATtag1 = p.RAT.get(instruction.operand1);
@@ -141,15 +147,47 @@ public class BranchUnit implements Module{
                 // Else wait on CMP value
 
                 // TODO will break if first ins is branch
-                for (int i = ROBindex; i > p.ROBcommit - 1; i--) {
-                    // TODO mod
-                    if (p.ROB.get(i).type == 3) {
-                        if (p.ROB.get(i).ready) {
-                            p.f = p.ROB.get(i).value;
-                        } else {
-                            RATtag2 = i;
+                if (ROBindex > p.ROBcommit) {
+                    // Issue pointer after commit
+                    for (int i = ROBindex; i > p.ROBcommit - 1; i--) {
+                        // if entry is a CMP
+                        if (p.ROB.get(i).type == 3) {
+                            if (p.ROB.get(i).ready) {
+                                p.f = p.ROB.get(i).value;
+                            } else {
+                                RATtag2 = i;
+                            }
+                            break;
                         }
-                        break;
+                    }
+                } else {
+                    // Commit pointer after issue
+                    boolean found = false;
+                    // Search down to 0
+                    for (int i = ROBindex; i > -1; i--) {
+                        // if entry is a CMP
+                        if (p.ROB.get(i).type == 3) {
+                            if (p.ROB.get(i).ready) {
+                                p.f = p.ROB.get(i).value;
+                            } else {
+                                RATtag2 = i;
+                            }
+                            found = true;
+                            break;
+                        }
+                    }
+                    // Search from end to commit
+                    if (!found) {
+                        for (int i = p.ROBSize - 1; i > p.ROBcommit - 1; i--) {
+                            if (p.ROB.get(i).type == 3) {
+                                if (p.ROB.get(i).ready) {
+                                    p.f = p.ROB.get(i).value;
+                                } else {
+                                    RATtag2 = i;
+                                }
+                                break;
+                            }
+                        }
                     }
                 }
 
@@ -172,6 +210,7 @@ public class BranchUnit implements Module{
         RS.clear();
     }
 
+    // Update entries on value broadcast
     public void updateRS(int ROBdestination, int value) {
         for (RSEntry entry : RS) {
             if (entry.tag1 != null) {

@@ -3,20 +3,27 @@ package com.company;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
+import java.util.stream.Collectors;
 
 public class MultDivUnit implements Module{
 
     Processor p;
     Module nextModule;
+    Execute exUnit;
 
     int RSsize = 4;
     List<RSEntry> RS = new ArrayList<>();
 
-    public MultDivUnit(Processor proc, Module next){
+    Random rand = new Random();
+
+    public MultDivUnit(Processor proc, Module next, Execute executionUnit){
         p = proc;
         nextModule = next;
+        exUnit = executionUnit;
     }
 
+    // Tick sub-pipeline
     @Override
     public void tick() {
         stage3Tick();
@@ -25,11 +32,18 @@ public class MultDivUnit implements Module{
     }
 
     private void stage1Tick() {
-        // Find the first (oldest) entry in the RS that has all values
-        Optional<RSEntry> entry = RS.stream().filter(rsEntry -> rsEntry.val1 != null && rsEntry.val2 != null).findFirst();
 
-        if (entry.isPresent()) {
-            stage1EndInstruction = entry.get();
+        // Get list of instructions ready to dispatch
+        List<RSEntry> validEntriesList = RS.stream().filter(rsEntry -> rsEntry.val1 != null && rsEntry.val2 != null).collect(Collectors.toList());
+
+        if (validEntriesList.size() > 0) {
+            // RS policies
+//            RSEntry entry = validEntriesList.get(rand.nextInt(validEntriesList.size())); //random
+//            RSEntry entry = validEntriesList.get(validEntriesList.size() - 1); //newest
+            RSEntry entry = validEntriesList.get(0); //oldest
+//            RSEntry entry = validEntriesList.get(exUnit.getMostDependedOn(validEntriesList)); //max dependence
+
+            stage1EndInstruction = entry;
             RS.remove(stage1EndInstruction);
         } else {
             stage1EndInstruction = null;
@@ -46,6 +60,7 @@ public class MultDivUnit implements Module{
 
         RSEntry validEntry = stage2EndInstruction;
 
+        // Perform operation
         if (validEntry != null) {
             // WB, ROB entry , value, unused
             Instruction WBins = new Instruction("WB", validEntry.ROBdestination, 0, 0);
@@ -72,17 +87,21 @@ public class MultDivUnit implements Module{
         return false;
     }
 
+    // Called by issue
+    // Creates ROB entry, RS entry and RAT entry
+    // Returns false if blocked
     @Override
     public boolean setNextInstruction(Instruction instruction) {
         if (RS.size() < RSsize) {
-            int ROBindex;
             // Add ROB entry
-            ROBindex = p.addROB(new ROBEntry(2, instruction.operand1, 0, false));
-            // Add RS entry
+            int ROBindex = p.addROB(new ROBEntry(2, instruction.operand1, 0, false));
+
             Integer RATtag1 = null;
             Integer val1 = null;
             Integer RATtag2 = null;
             Integer val2 = null;
+
+            // Check RAT and ROB to determine where operands come from
             RATtag1 = p.RAT.get(instruction.operand2);
             if (RATtag1 == null) {
                 val1 = p.ARF.get(instruction.operand2);
@@ -91,6 +110,7 @@ public class MultDivUnit implements Module{
                 val1 = p.ROB.get(RATtag1).value;
                 RATtag1 = null;
             }
+
             RATtag2 = p.RAT.get(instruction.operand3);
             if (RATtag2 == null) {
                 val2 = p.ARF.get(instruction.operand3);
@@ -99,6 +119,8 @@ public class MultDivUnit implements Module{
                 val2 = p.ROB.get(RATtag2).value;
                 RATtag2 = null;
             }
+
+            // Add RS entry
             RS.add(new RSEntry(instruction.opcode, ROBindex, RATtag1, RATtag2, val1, val2));
             // Add RAT entry
             p.RAT.set(instruction.operand1, ROBindex);
@@ -114,6 +136,7 @@ public class MultDivUnit implements Module{
         stage2EndInstruction = null;
     }
 
+    // Update entries on value broadcast
     public void updateRS(int ROBdestination, int value) {
         for (RSEntry entry : RS) {
             if (entry.tag1 != null) {

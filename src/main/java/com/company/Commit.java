@@ -16,12 +16,15 @@ public class Commit implements Module{
     @Override
     public void tick() {
         for (int i = 0; i < width; i++) {
+
             if (!p.ROBEmpty()) {
                 if (p.ROB.get(p.ROBcommit).ready) {
+                    // If entry at commit pointer is ready
                     p.noInstructions += 1;
                     ROBEntry entry = p.ROB.get(p.ROBcommit);
+
+                    // If branch instruction
                     if (entry.type == 0) {
-//                    System.out.println("commit branch");
                         p.noBranches++;
                         p.BP.updateBTB(entry.instructionPC, entry.value + 1, entry.branchExecuteTaken);
                         if (entry.branchExecuteTaken != entry.branchFetchTaken) {
@@ -35,31 +38,36 @@ public class Commit implements Module{
                         }
                     }
 
+                    // If register update function
                     if (entry.type == 2 || entry.type == 1) {
                         p.ARF.set(entry.destinationRegister, entry.value);
 
-                        // Update RAT
+                        // Update RAT if it's value points to committed ROB entry
                         if (p.RAT.get(entry.destinationRegister) == p.ROBcommit) {
                             p.RAT.set(entry.destinationRegister, null);
                         }
                     }
 
+                    // If CMP
                     if (entry.type == 3) {
                         p.f = entry.value;
                     }
+
+                    // If HALT
                     if (entry.type == 4) {
                         p.fin = true;
-                        // allow all store instructions to update memory
+                        // allow all store instructions in pipeline to update memory
                         p.noInstructions += 2;
                         p.insMEM.tick();
                         p.insMEM.tick();
-//                    p.insMEM.tick();
                     }
 
+                    // If store
                     if (entry.type == 5) {
                         p.insE.loadStoreUnit.sendStoreToMem(p.ROBcommit);
                     }
 
+                    // update ROB
                     p.ROB.set(p.ROBcommit, null);
                     p.ROBcommit += 1;
                     p.ROBcommit = p.ROBcommit % p.ROBSize;

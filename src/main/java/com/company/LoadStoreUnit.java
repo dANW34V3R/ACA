@@ -8,100 +8,89 @@ import java.util.Optional;
 public class LoadStoreUnit implements Module{
 
     Processor p;
-    WriteBack WBModule;
+    Broadcast WBModule;
     Memory memModule;
 
+    int noUnits = 4;
+
+    // Load Store Queue
     int LSQsize = 20;
     List<LSQEntry> LSQ = new ArrayList<>();
 
-    public LoadStoreUnit(Processor proc, WriteBack next, Memory memMod){
+    public LoadStoreUnit(Processor proc, Broadcast next, Memory memMod){
         p = proc;
         WBModule = next;
         memModule = memMod;
     }
+
     @Override
     public void tick() {
-        // address calculation
-        Optional<LSQEntry> entry = LSQ.stream().filter(lsqEntry -> lsqEntry.val1 != null && lsqEntry.val2 != null && lsqEntry.strValVal != null).findFirst();
-        if (entry.isPresent()) {
-            LSQEntry validEntry = entry.get();
-            LSQ.get(LSQ.indexOf(validEntry)).address = validEntry.val1 + validEntry.val2;
+        for (int k = 0; k < noUnits; k++) {
 
-            // check for value forwarding
-            if (validEntry.LSBool) {
-                // load
-                // look up through LSQ for store with same address
-                for (int i = LSQ.indexOf(validEntry) - 1; i > -1; i--) {
-                    LSQEntry storeEntry = LSQ.get(i);
-                    if (!storeEntry.LSBool && storeEntry.address == validEntry.address) {
-                        LSQ.get(LSQ.indexOf(validEntry)).value = storeEntry.value;
-                        LSQ.get(LSQ.indexOf(validEntry)).complete = true;
-                        break;
+            Optional<LSQEntry> entry = LSQ.stream().filter(lsqEntry -> lsqEntry.val1 != null && lsqEntry.val2 != null && lsqEntry.strValVal != null && !lsqEntry.complete && !lsqEntry.waiting).findFirst();
+
+            if (entry.isPresent()) {
+                LSQEntry validEntry = entry.get();
+
+                // address calculation
+                LSQ.get(LSQ.indexOf(validEntry)).address = validEntry.val1 + validEntry.val2;
+
+                // check for value forwarding
+                if (validEntry.LSBool) {
+                    // load
+                    // look up through LSQ for store with same address
+
+                    for (int i = LSQ.indexOf(validEntry) - 1; i > -1; i--) {
+                        LSQEntry storeEntry = LSQ.get(i);
+                        if (!storeEntry.LSBool && storeEntry.address == validEntry.address && storeEntry.value != null) {
+                            LSQ.get(LSQ.indexOf(validEntry)).value = storeEntry.value;
+                            LSQ.get(LSQ.indexOf(validEntry)).complete = true;
+                            break;
+                        }
                     }
-                }
-                // if no forwarding, get value from memory
-                if (!LSQ.get(LSQ.indexOf(validEntry)).complete) {
-                    // type, address, sequence number, unused
-                    memModule.setNextInstruction(new Instruction("load", validEntry.val1 + validEntry.val2, validEntry.sequenceNumber, 0));
-                }
-            } else {
-                // store
-                // look to forward through LSQ
+                    // if no forwarding, get value from memory
+                    if (!LSQ.get(LSQ.indexOf(validEntry)).complete) {
+                        // type, address, sequence number, unused
+                        memModule.setNextInstruction(new Instruction("load", validEntry.val1 + validEntry.val2, validEntry.sequenceNumber, 0));
+                        LSQ.get(LSQ.indexOf(validEntry)).waiting = true;
+                    }
+                } else {
+                    // store
+                    // look to forward through LSQ
 
-                for (int i = LSQ.indexOf(validEntry) + 1; i < LSQ.size(); i++) {
-                    LSQEntry loadEntry = LSQ.get(i);
-                    if (!loadEntry.LSBool && loadEntry.address == validEntry.address) {
-                        // if entry is a store with the same address then break
-                        break;
+                    for (int i = LSQ.indexOf(validEntry) + 1; i < LSQ.size(); i++) {
+                        LSQEntry loadEntry = LSQ.get(i);
+                        if (!loadEntry.LSBool && loadEntry.address == validEntry.address) {
+                            // if entry is a store with the same address then break
+                            break;
+                        }
+
+                        if (loadEntry.LSBool && loadEntry.address == validEntry.address) {
+                            // if entry is a load with the same address, forward value and keep going down LSQ
+                            LSQ.get(LSQ.indexOf(loadEntry)).value = validEntry.strValVal;
+                            LSQ.get(LSQ.indexOf(loadEntry)).complete = true;
+                        }
                     }
 
-                    if (loadEntry.LSBool && loadEntry.address == validEntry.address) {
-                        // if entry is a load with the same address, forward value and keep going down LSQ
-                        LSQ.get(LSQ.indexOf(loadEntry)).value = validEntry.value;
-                        LSQ.get(LSQ.indexOf(loadEntry)).complete = true;
-                    }
+                    LSQ.get(LSQ.indexOf(validEntry)).complete = true;
+
+                    // set ROB entry to ready so store can be commited
+                    p.ROB.get(validEntry.ROBdestination).ready = true;
                 }
+            }
 
-                LSQ.get(LSQ.indexOf(validEntry)).complete = true;
-
-                // set ROB entry to ready so store can be commited
-                p.ROB.get(validEntry.ROBdestination).ready = true;
+            // Check if head of LSQ can be committed
+            if (LSQ.size() > 0) {
+                LSQEntry head = LSQ.get(0);
+                if (head.LSBool && head.complete) {
+                    // if the head instruction is a load and complete then WB
+                    // WB, ROB entry , value, unused
+                    Instruction WBins = new Instruction("WB", head.ROBdestination, head.value, 0);
+                    WBModule.setNextInstruction(WBins);
+                    LSQ.remove(0);
+                }
             }
         }
-
-
-
-        // if head is complete, set ROB entry to complete
-
-//            if (validEntry.LSBool) {
-//                // load
-                // check stores for same addr
-            // if same addr and has val: use val else go to memory then update val field
-//
-//                WBins.operand2 = p.MEM.get(validEntry.val1 + validEntry.val2);
-//
-//
-//            } else {
-//                // store
-//
-//                // memory destination
-//                p.ROB.get(validEntry.ROBdestination).destinationRegister = validEntry.val1 + validEntry.val2;
-//                WBins.operand2 = validEntry.strValVal;
-//
-//            }
-
-
-        if (LSQ.size() > 0) {
-            LSQEntry head = LSQ.get(0);
-            if (head.LSBool && head.complete) {
-                // if the head instruction is a load and complete then WB
-                LSQ.remove(0);
-                // WB, ROB entry , value, unused
-                Instruction WBins = new Instruction("WB", head.ROBdestination, head.value, 0);
-                WBModule.setNextInstruction(WBins);
-            }
-        }
-
     }
 
     @Override
@@ -109,6 +98,9 @@ public class LoadStoreUnit implements Module{
         return false;
     }
 
+    // Called by issue
+    // Creates ROB entry, RS entry and RAT entry
+    // Returns false if blocked
     @Override
     public boolean setNextInstruction(Instruction instruction) {
 
@@ -208,9 +200,9 @@ public class LoadStoreUnit implements Module{
     @Override
     public void invalidateCurrentInstruction() {
         LSQ.clear();
-//        nextInstruction.valid = false;
     }
 
+    // Update entries on value broadcast
     public void updateLSQ(int ROBdestination, int value){
         for (LSQEntry entry : LSQ) {
             if (entry.tag1 != null) {
@@ -234,6 +226,8 @@ public class LoadStoreUnit implements Module{
         }
     }
 
+    // Called by commit
+    // Sends first entry of LSQ to be stored
     public void sendStoreToMem(int ROBindex) {
         LSQEntry storeEntry = LSQ.get(0);
 
@@ -250,6 +244,8 @@ public class LoadStoreUnit implements Module{
         memModule.setNextInstruction(new Instruction("store", storeEntry.address, storeEntry.sequenceNumber, storeEntry.strValVal));
     }
 
+    // Called by memory
+    // Updates load LSQ entry with value from memory
     public void sendLoad(int value, int sequenceNumber) {
         for (LSQEntry entry : LSQ) {
             if(entry.sequenceNumber == sequenceNumber) {

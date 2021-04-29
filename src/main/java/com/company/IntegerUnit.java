@@ -1,31 +1,42 @@
 package com.company;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class IntegerUnit implements Module{
 
     Processor p;
     Module nextModule;
+    Execute exUnit;
+
+    int noUnits = 4;
 
     int RSsize = 4;
     List<RSEntry> RS = new ArrayList<>();
 
-    public IntegerUnit(Processor proc, Module next){
+    Random rand = new Random();
+
+    public IntegerUnit(Processor proc, Module next, Execute executionUnit){
         p = proc;
         nextModule = next;
+        exUnit = executionUnit;
     }
 
     @Override
     public void tick() {
 
-        for (int i = 0; i < 2; i++) {
-            Optional<RSEntry> entry = RS.stream().filter(rsEntry -> rsEntry.val1 != null && rsEntry.val2 != null).findFirst();
+        // Loop for each unit, simulates grouped RS
+        for (int i = 0; i < noUnits; i++) {
 
-            if (entry.isPresent()) {
-                RSEntry validEntry = entry.get();
+            // Get list of instructions ready to dispatch
+            List<RSEntry> validEntriesList = RS.stream().filter(rsEntry -> rsEntry.val1 != null && rsEntry.val2 != null).collect(Collectors.toList());
+
+            if (validEntriesList.size() > 0) {
+                // RS policies
+//                RSEntry entry = validEntriesList.get(rand.nextInt(validEntriesList.size())); //random
+//                RSEntry entry = validEntriesList.get(validEntriesList.size() - 1); //newest
+                RSEntry validEntry = validEntriesList.get(0); //oldest
+//                RSEntry entry = validEntriesList.get(exUnit.getMostDependedOn(validEntriesList)); //max dependence
 
                 RS.remove(validEntry);
 
@@ -51,13 +62,10 @@ public class IntegerUnit implements Module{
                         //op1 - op2 , update flags
                         int result = validEntry.val1 - validEntry.val2;
                         if (result == 0) {
-//                        p.f = 0;
                             WBins.operand2 = 0;
                         } else if (result < 0) {
-//                        p.f = -1;
                             WBins.operand2 = -1;
                         } else {
-//                        p.f = 1;
                             WBins.operand2 = 1;
                         }
                         break;
@@ -78,8 +86,10 @@ public class IntegerUnit implements Module{
         return false;
     }
 
+    // Called by issue
+    // Creates ROB entry, RS entry and RAT entry
+    // Returns false if blocked
     @Override
-    // Puts instruction in RS and ROB if space
     public boolean setNextInstruction(Instruction instruction) {
         if (RS.size() < RSsize) {
             int ROBindex;
@@ -88,8 +98,8 @@ public class IntegerUnit implements Module{
                 RS.add(new RSEntry(instruction.opcode, ROBindex, null, null, 0, 0));
                 return true;
             }
-            // Add ROB entry
             else if (Arrays.asList("CMP", "NOP").contains(instruction.opcode)) {
+                // Add ROB entry
                 ROBindex = p.addROB(new ROBEntry(3, -1, 0, false));
 
                 // Add RS entry
@@ -121,6 +131,7 @@ public class IntegerUnit implements Module{
 
                 return true;
             } else if (Arrays.asList("MOV", "ADD", "SUB").contains(instruction.opcode)) {
+                // Add ROB entry
                 ROBindex = p.addROB(new ROBEntry(2, instruction.operand1, 0, false));
 
                 // Add RS entry
@@ -206,6 +217,7 @@ public class IntegerUnit implements Module{
         RS.clear();
     }
 
+    // Update entries on value broadcast
     public void updateRS(int ROBdestination, int value) {
         for (RSEntry entry : RS) {
             if (entry.tag1 != null) {

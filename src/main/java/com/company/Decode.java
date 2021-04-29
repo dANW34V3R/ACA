@@ -14,26 +14,21 @@ public class Decode implements Module{
     public Decode(Processor proc, Module next) {
         p = proc;
         nextModule = next;
-        for (Instruction nIns : nextInstructionList) {
-            nIns.valid = false;
-        }
     }
-
 
     @Override
     public void tick() {
-//        System.out.println("DECODE" + blocked());
-        // TODO limit to width, remove element on tick
-//        if (!blocked()) {
-            List<Instruction> movedOn = new ArrayList<>();
-            for (Instruction nIns : nextInstructionList) {
-                if (!nextModule.blocked()) {
-                    nextModule.setNextInstruction(nIns);
-                    movedOn.add(nIns);
-                }
+        if (nextInstructionList.size() > width) {
+            throw new java.lang.Error("Decode contains more instructions that width");
+        }
+        List<Instruction> movedOn = new ArrayList<>();
+        for (Instruction nIns : nextInstructionList) {
+            if (!nextModule.blocked()) {
+                nextModule.setNextInstruction(nIns);
+                movedOn.add(nIns);
             }
-            nextInstructionList.removeAll(movedOn);
-//        }
+        }
+        nextInstructionList.removeAll(movedOn);
     }
 
     @Override
